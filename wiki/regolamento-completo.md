@@ -21,37 +21,31 @@ in qualsiasi momento senza preavviso, ma probabilmente non lo farà.
 
 ## Capo I — Del Meme
 
-**Art. 1 — Integrità del Meme**
-Ogni meme deve essere condiviso nella sua forma originale o in una variante
-riconoscibile. La decontestualizzazione volontaria è permessa solo a fini artistici.
+**Art. 1 —**
+...
 
-**Art. 2 — Qualità Minima**
-I meme condivisi nei canali ufficiali devono avere una qualità minima di 6/10
-secondo la scala soggettiva del Custode del Meme in carica.
+**Art. 2 —**
+...
 
-**Art. 3 — Originalità**
-I meme presi da pagine Facebook con nomi come "ahahah lol" o "ridere è bello"
-sono automaticamente classificati come eresie di terzo grado.
+**Art. 3 —**
+...
 
-**Art. 4 — Il Meme Sacro**
-Il Meme Fondatore non può essere modificato, parodiato o usato come reazione
-generica. È un documento storico, non un format.
+**Art. 4 —**
+...
 
 ---
 
 ## Capo II — Della Condotta
 
-**Art. 5 — Rispetto Reciproco**
-I membri si trattano con rispetto, eccetto durante le discussioni teologiche
-sul ranking dei meme, dove il tono può alzarsi moderatamente.
+**Art. 5 — Saluto obbligatorio**
+All'incontro i membri sono obbligati a salutarsi con il saluto ufficiale del gruppo (lo stesso fatto durante il giuramento)
 
-**Art. 6 — Il Silenzio Sacro**
-Quando il Gran Maestro condivide un meme, è obbligatorio reagire entro 24 ore.
-Il silenzio prolungato è interpretato come disapprovazione e registrato.
+**Art. 6 —**
+...
 
 **Art. 7 — Le Riunioni**
 Le riunioni non sono obbligatorie. Ma chi non viene viene citato come assente
-nel verbale, che esiste solo in teoria.
+nel verbale.
 
 ---
 
@@ -62,15 +56,10 @@ Le infrazioni sono punite secondo la seguente scala:
 
 | Livello | Infrazione | Sanzione |
 |---------|------------|----------|
-| I | Meme di qualità < 6/10 | Ammonizione verbale |
-| II | Meme < 4/10 | Ammonizione scritta + vergogna pubblica |
-| III | Spiegare una battuta | Silenziamento 24h |
-| IV | Modificare il Meme Fondatore | Ban temporaneo |
-| V | Tradimento della Setta | Ban definitivo + meme di addio |
 
 **Art. 9 — Ricorso**
 I membri sanzionati possono fare ricorso entro 7 giorni.
-Il ricorso viene esaminato dal Gran Maestro, che decide in totale autonomia.
+Il ricorso viene esaminato da tutti i membri che decidono con una votazione.
 
 ---
 
@@ -78,15 +67,27 @@ Il ricorso viene esaminato dal Gran Maestro, che decide in totale autonomia.
 
 **Art. 10 — La Pausa**
 Un membro può richiedere una "pausa" di massimo 30 giorni.
-Durante la pausa mantiene l'accesso all'Archivio ma non può condividere meme.
 
 **Art. 11 — L'Uscita Definitiva**
-L'uscita definitiva richiede una lettera formale di dimissioni inviata al Gran Maestro.
+L'uscita definitiva richiede una lettera formale di dimissioni inviata al gruppo.
 Verrà letta ad alta voce durante la prossima riunione, poi archiviata.
 
 ---
 
-*Il presente Regolamento è entrato in vigore al momento in cui qualcuno ha detto "facciamo una roba seria".*
+## I 10 comandamenti
+
+- Non avere altro Dio al di fuori del Semmen di Solaire
+- Mai paccare un concilio del Semmen
+- Onora e santifica le feste del Semmen
+- Non insultare il Semmen invano
+- Raggiungi sempre il Brodo Primordiale
+- Non desiderare le sacerdotesse del Semmen d'altri
+- Non uccidere il Semmen
+- Non espellere il Semmen in maniera impura
+- Non rubare il Semmen
+- HAIL SEMMEN
+
+---
 
 *Firmato: Il Gran Maestro Fondatore*
 *Controfirmato: I Grandi Anziani (implicitamente)*

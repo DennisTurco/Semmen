@@ -18,7 +18,6 @@ alla conoscenza custodita dalla Setta del Semmen.
 Usa il pannello laterale sinistro per navigare tra le sezioni. I documenti sono organizzati in:
 
 - **La Setta** — storia, gerarchia, regolamento
-- **Glossario Meme** — catalogo dei meme interni e dei riferimenti
 - **Guide** — documentazione tecnica per i contributori
 
 ---
@@ -31,6 +30,8 @@ Per i nuovi iniziati, si consiglia di leggere nell'ordine:
 2. [Gerarchia Interna](#gerarchia) — conoscere il proprio posto nell'Ordine
 3. [Regolamento Completo](#regolamento-completo) — le leggi sacre
 4. [Dizionario Interno](#dizionario) — parlare la lingua della Setta
+4. [Stadi di estrazione del Semmen](#stadi-del-semmen) — Per conoscere tutti gli stadi di estrazione
+5. [Meme](#meme) — Tutti i meme interni catalogati
 
 ---
 

@@ -32,17 +32,22 @@
       ]
     },
     {
-      "label": "Glossario Meme",
+      "label": "Glossario",
       "pages": [
-        {
-          "id": "meme-fondatore",
-          "title": "Il Meme Fondatore",
-          "description": "Il meme che ha dato origine a tutto"
-        },
         {
           "id": "dizionario",
           "title": "Dizionario Interno",
           "description": "Termini, slang e riferimenti della Setta"
+        },
+        {
+          "id": "meme",
+          "title": "Meme",
+          "description": "Tutti i meme interni catalogati"
+        },
+        {
+          "id": "stadi-del-semmen",
+          "title": "Stadi di estrazione del Semmen",
+          "description": "Tutti gli stadi del Semmen elencati"
         }
       ]
     },

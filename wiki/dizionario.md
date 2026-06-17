@@ -1,14 +1,14 @@
 ---
 title: Dizionario Interno
-category: Glossario Meme
+category: Glossario
 classification: RISERVATO
-author: Custode del Meme
+author: Custode del Semmen
 ---
 
 # Dizionario Interno della Setta
 
 Glossario dei termini, slang e riferimenti usati nei canali interni.
-Aggiornato continuamente dai Custodi del Meme.
+Aggiornato continuamente dai Custodi del Semmen.
 
 ---
 
@@ -37,21 +37,13 @@ spesso contemporaneamente.
 
 ---
 
-## M
-
-**MEME DI SERVIZIO**
-Un meme condiviso non perché sia divertente, ma perché la situazione lo richiedeva.
-Qualità variabile. Tollerato.
-
----
-
 ## S
 
 **SEMMEN**
 Il nome della Setta. L'origine del termine è classificata al livello più alto.
 I nuovi membri scoprono la verità al momento dell'iniziazione completa.
 
-*(Nota per i nuovi iniziati: no, non è quello che stai pensando. O forse sì. Dipende.)*
+*(Nota per i nuovi iniziati: È esattamente quello che sembra)*
 
 ---
 
