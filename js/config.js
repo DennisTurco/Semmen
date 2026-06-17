@@ -9,21 +9,13 @@ const CONFIG = {
 
   /* ── WIKI ──────────────────────────────────────────────────── */
   wiki: {
-    // Iniettata a build-time dal GitHub Actions (secret: WIKI_PASSWORD).
-    // In locale usa il file .env.local oppure sostituisci qui temporaneamente.
-    password: "semmensetta2025?",
+    password: "",
     accessTitle: "Archivio Riservato",
     accessSubtitle: "Inserisci il Codice di Accesso",
   },
 
   /* ── EMAIL (EmailJS) ───────────────────────────────────────── */
   email: {
-    // Valori iniettati a build-time dal GitHub Actions.
-    // Secrets da configurare nel repo: EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID,
-    // EMAILJS_TEMPLATE_ID, EMAILJS_RECIPIENT
-    //
-    // EmailJS usa anche il domain whitelisting come protezione aggiuntiva:
-    // aggiungi il dominio GitHub Pages in emailjs.com → Account → Security.
     publicKey:  "__EMAILJS_PUBLIC_KEY__",
     serviceId:  "__EMAILJS_SERVICE_ID__",
     templateId: "__EMAILJS_TEMPLATE_ID__",
