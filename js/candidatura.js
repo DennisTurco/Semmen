@@ -141,10 +141,10 @@ form.addEventListener('submit', async e => {
       provenienza:     data.provenienza,
 
       // Domande sacre
-      find_us:      data.find_us,
-      motivazione:  data.motivazione,
-      flosscio:     data.flosscio,
-      flosscio:     data.risposta_giusta,
+      find_us:         data.find_us,
+      motivazione:     data.motivazione,
+      flosscio:        data.flosscio        || 'N/D',
+      risposta_giusta: data.risposta_giusta || 'N/D',
 
       // Timestamp
       data_candidatura: new Date().toLocaleString('it-IT'),
