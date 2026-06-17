@@ -2,6 +2,28 @@
  * main.js — utilities condivise tra tutte le pagine
  */
 
+/* ── Hamburger menu ─────────────────────────────────────────── */
+(function initBurger() {
+  const burger = document.getElementById('navbar-burger');
+  const menu   = document.getElementById('navbar-menu');
+  if (!burger || !menu) return;
+
+  burger.addEventListener('click', () => {
+    const open = menu.classList.toggle('is-open');
+    burger.classList.toggle('is-open', open);
+    burger.setAttribute('aria-expanded', open);
+  });
+
+  // Chiudi cliccando fuori
+  document.addEventListener('click', e => {
+    if (!burger.contains(e.target) && !menu.contains(e.target)) {
+      menu.classList.remove('is-open');
+      burger.classList.remove('is-open');
+      burger.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+
 /* ── Navigazione attiva ─────────────────────────────────────── */
 (function markActiveNav() {
   const links = document.querySelectorAll('.navbar__nav a');
