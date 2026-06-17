@@ -1,0 +1,60 @@
+{
+  "groups": [
+    {
+      "label": "Indice",
+      "pages": [
+        {
+          "id": "index",
+          "title": "Benvenuto nell'Archivio",
+          "description": "Pagina principale della wiki"
+        }
+      ]
+    },
+    {
+      "label": "La Setta",
+      "pages": [
+        {
+          "id": "storia",
+          "title": "Storia della Setta",
+          "description": "Le origini e l'evoluzione dell'Ordine"
+        },
+        {
+          "id": "gerarchia",
+          "title": "Gerarchia Interna",
+          "description": "Gradi e ruoli ufficiali",
+          "badge": "NUOVO"
+        },
+        {
+          "id": "regolamento-completo",
+          "title": "Regolamento Completo",
+          "description": "Tutte le norme della Setta"
+        }
+      ]
+    },
+    {
+      "label": "Glossario Meme",
+      "pages": [
+        {
+          "id": "meme-fondatore",
+          "title": "Il Meme Fondatore",
+          "description": "Il meme che ha dato origine a tutto"
+        },
+        {
+          "id": "dizionario",
+          "title": "Dizionario Interno",
+          "description": "Termini, slang e riferimenti della Setta"
+        }
+      ]
+    },
+    {
+      "label": "Guide",
+      "pages": [
+        {
+          "id": "come-aggiungere-pagine",
+          "title": "Come Aggiungere Pagine",
+          "description": "Guida tecnica per aggiornare la wiki"
+        }
+      ]
+    }
+  ]
+}

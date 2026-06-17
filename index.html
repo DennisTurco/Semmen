@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ordine Arcano dei Portatori del Meme. Entra se ne sei degno.">
+  <meta name="robots" content="noindex">
+  <title>La Setta del Semmen</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <div class="navbar__logo seal-container"></div>
+        La Setta del Semmen
+      </a>
+      <ul class="navbar__nav">
+        <li><a href="index.html">Sanctuarium</a></li>
+        <li><a href="wiki.html">Archivio</a></li>
+        <li><a href="candidatura.html">Candidati</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__seal seal-container"></div>
+
+    <h1 class="hero__title">La Setta del Semmen</h1>
+    <p class="hero__subtitle">Ordo Arcanus Memorum</p>
+
+    <div class="hero__divider">
+      <span class="hero__divider-icon">✦</span>
+    </div>
+
+    <p class="hero__description">
+      Un ordine antico<br>
+      Guardiani supremi del semmen.<br>
+      Cavalieri di Solaire.
+    </p>
+
+    <div class="hero__actions">
+      <a href="candidatura.html" class="btn btn--primary">Candidati all'Ordine</a>
+      <a href="wiki.html" class="btn btn--outline">Archivio Segreto</a>
+    </div>
+
+    <p class="hero__classified">
+      DOCUMENTO CLASSIFICATO &nbsp;·&nbsp; ACCESSO CONTROLLATO &nbsp;·&nbsp; GRADO III
+    </p>
+  </section>
+
+  <!-- SEZIONE: Chi siamo -->
+  <section class="home-section">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <span class="section-header__label">Missione</span>
+        <h2 class="section-header__title">Chi Siamo</h2>
+        <p class="section-header__subtitle">
+          Una confraternita seria che si occupa di cose non serie
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <a href="wiki.html" class="feature-card" data-reveal>
+          <span class="feature-card__icon">📜</span>
+          <h3 class="feature-card__title">L'Archivio</h3>
+          <p class="feature-card__desc">
+            Una wiki riservata che cataloga ogni meme, ogni riferimento interno,
+            ogni momento storico della Setta. Accesso solo per i membri iniziati.
+          </p>
+        </a>
+
+        <a href="candidatura.html" class="feature-card" data-reveal>
+          <span class="feature-card__icon">🕯️</span>
+          <h3 class="feature-card__title">Il Rito di Ingresso</h3>
+          <p class="feature-card__desc">
+            L'adesione alla Setta non è per tutti. Un formulario,
+            un regolamento sacro, un giuramento vincolante.
+            La tua candidatura verrà valutata dai Grandi Maestri.
+          </p>
+        </a>
+
+        <div class="feature-card" data-reveal style="cursor:default;">
+          <span class="feature-card__icon">⚖️</span>
+          <h3 class="feature-card__title">Il Regolamento</h3>
+          <p class="feature-card__desc">
+            Ogni Setta che si rispetti ha delle leggi. Le nostre sono
+            inviolabili e immutabili.
+            Possibile chiedere redenzione attraverso indulgenze. Altrimenti scumunica.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEZIONE: Statistiche -->
+  <section class="home-section">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <span class="section-header__label">Dati Classificati</span>
+        <h2 class="section-header__title">In Cifre</h2>
+      </div>
+
+      <div class="stats-strip" data-reveal id="stats-strip">
+        <!-- popolato da JS con CONFIG.stats -->
+      </div>
+    </div>
+  </section>
+
+  <!-- SEZIONE: Citazione -->
+  <section class="home-section">
+    <div class="container--narrow" style="text-align:center;" data-reveal>
+      <blockquote style="border:1px solid var(--border-gold);background:var(--bg-surface);padding:2.5rem;border-radius:var(--radius);">
+        <p style="font-family:var(--font-display);font-size:1.4rem;font-style:italic;color:var(--text-primary);margin-bottom:1rem;">
+          "Il meme non è una forma d'arte.<br>Il meme è una filosofia di vita."
+        </p>
+        <cite style="font-family:var(--font-mono);font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);">
+          — Il Gran Maestro Fondatore, Anno Domini MMXXIV
+        </cite>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo seal-container"></div>
+        <span class="footer__name">La Setta del Semmen</span>
+      </div>
+      <div class="footer__legal">
+        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        Tutti i meme sono riservati. Riproduzione vietata.
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    // Statistiche
+    const statsEl = document.getElementById('stats-strip');
+    if (statsEl && CONFIG.stats) {
+      statsEl.innerHTML = [
+        { label: 'Membri', value: CONFIG.stats.members },
+        { label: 'Meme Catalogati', value: CONFIG.stats.memes },
+        { label: 'Eresie Soppresse', value: CONFIG.stats.heresies },
+        { label: 'Anni di Attività', value: CONFIG.stats.years },
+      ].map(s => `
+        <div class="stat-item">
+          <span class="stat-item__value">${s.value}</span>
+          <span class="stat-item__label">${s.label}</span>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

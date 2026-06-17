@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Candidatura — La Setta del Semmen</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <div class="navbar__logo seal-container"></div>
+        La Setta del Semmen
+      </a>
+      <ul class="navbar__nav">
+        <li><a href="index.html">Sanctuarium</a></li>
+        <li><a href="wiki.html">Archivio</a></li>
+        <li><a href="candidatura.html">Candidati</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top:3rem;padding-bottom:6rem;">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <p class="page-header__label">Rito di Ammissione — Modulo Ufficiale</p>
+      <h1 class="page-header__title">Candidatura alla Setta</h1>
+      <p class="page-header__subtitle">
+        Compila il formulario con rigore. I Grandi Maestri esamineranno la tua richiesta.
+        Non tutte le candidature verranno accolte.
+      </p>
+    </div>
+
+    <!-- SUCCESS SCREEN -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-screen__seal seal-container"></div>
+      <h2 class="success-screen__title">Candidatura Trasmessa</h2>
+      <p class="success-screen__text">
+        La tua richiesta è giunta ai Grandi Maestri della Setta.<br>
+        Sarai contattato attraverso i canali appropriati.<br>
+        Conserva il tuo codice candidato.
+      </p>
+      <div class="success-screen__code" id="candidate-code">SMM-0000-XXX</div>
+      <p style="color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:2rem;">
+        Codice Candidatura — Non Condividere
+      </p>
+      <a href="index.html" class="btn btn--outline">Torna al Sanctuarium</a>
+    </div>
+
+    <!-- FORM LAYOUT -->
+    <div class="candidatura-layout" id="form-container">
+
+      <!-- MAIN FORM -->
+      <div>
+        <!-- STEPS BAR -->
+        <div class="steps-bar">
+          <div class="step-item active">
+            <div class="step-dot">I</div>
+            <span class="step-label">Identità</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item">
+            <div class="step-dot">II</div>
+            <span class="step-label">Prove</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item">
+            <div class="step-dot">III</div>
+            <span class="step-label">Regolamento</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item">
+            <div class="step-dot">IV</div>
+            <span class="step-label">Giuramento</span>
+          </div>
+        </div>
+
+        <form id="candidatura-form" novalidate>
+
+          <!-- STEP 1: Identità -->
+          <div class="form-step active" data-step="1">
+            <div class="card card--gold">
+              <div class="card__header">
+                <h3 style="font-size:1.3rem;">I. Dichiarazione d'Identità</h3>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-top:0.3rem;">
+                  I tuoi dati verranno custoditi nell'Archivio Segreto della Setta.
+                </p>
+              </div>
+              <div class="card__body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                  <div class="form-group">
+                    <label class="form-label" for="nome">Nome <span class="required">*</span></label>
+                    <input type="text" id="nome" name="nome" class="form-input" placeholder="Il tuo nome" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="cognome">Cognome <span class="required">*</span></label>
+                    <input type="text" id="cognome" name="cognome" class="form-input" placeholder="Il tuo cognome" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="email">Email <span class="required">*</span></label>
+                  <input type="email" id="email" name="email" class="form-input" placeholder="tua@email.com" required>
+                  <p class="form-hint">Useremo questa email per comunicazioni ufficiali della Setta.</p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="telefono">numero telefono <span class="required">*</span></label>
+                  <input type="telefono" id="telefono" name="telefono" class="form-input" placeholder="+39 123 123 1234" required>
+                  <p class="form-hint">Useremo questo numero nel caso verrai accettato per aggiungerti al gruppo whatsapp</p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="discord">Username Discord</label>
+                  <input type="text" id="discord" name="discord" class="form-input" placeholder="utente#0000">
+                  <p class="form-hint">Opzionale, ma consigliato per i canali segreti.</p>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                  <div class="form-group">
+                    <label class="form-label" for="eta">Età <span class="required">*</span></label>
+                    <select id="eta" name="eta" class="form-select" required>
+                      <option value="">— Seleziona —</option>
+                      <option>Meno di 18 anni</option>
+                      <option>18-24 anni</option>
+                      <option>25-30 anni</option>
+                      <option>31-40 anni</option>
+                      <option>Oltre 40 anni</option>
+                      <option>Non lo so più</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="provenienza">Provenienza <span class="required">*</span></label>
+                    <input type="text" id="provenienza" name="provenienza" class="form-input" placeholder="Città / Paese" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="sesso">Sesso <span class="required">*</span></label>
+                  <select id="sesso" name="sesso" class="form-select" required>
+                    <option value="">— Seleziona —</option>
+                    <option>Maschio</option>
+                    <option>Femmina</option>
+                    <option>Tirannosaurus Rex</option>
+                    <option>Acquilone</option>
+                    <option>Scaldabagno</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="professione">Professione / Occupazione <span class="required">*</span></label>
+                  <select id="professione" name="professione" class="form-select" required>
+                    <option value="">— Seleziona —</option>
+                    <option>Studente (professione nobile)</option>
+                    <option>Lavoratore (schiavo del sistema)</option>
+                    <option>Freelance (libero ma disperato)</option>
+                    <option>NEET (uomo libero)</option>
+                    <option>Disoccupato (ottimo)</option>
+                    <option>Altro / Preferirei non dirlo</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-nav">
+              <span></span>
+              <button type="button" class="btn btn--primary" data-next>
+                Prosegui → Prove di Idoneità
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Prove -->
+          <div class="form-step" data-step="2">
+            <div class="card card--gold">
+              <div class="card__header">
+                <h3 style="font-size:1.3rem;">II. Prove di Idoneità</h3>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-top:0.3rem;">
+                  Le tue risposte verranno valutate da un Comitato di Saggi.
+                  Non esistono risposte sbagliate.
+                </p>
+              </div>
+              <div class="card__body">
+                <div class="form-group">
+                  <label class="form-label" for="find_us">
+                    Come ci hai trovati? <span class="required">*</span>
+                  </label>
+                  <input type="text" id="find_us" name="find_us" class="form-input"
+                         placeholder="" required>
+                  <p class="form-hint">Per capire se sei uno sgherro di un'altra setta.</p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="motivazione">
+                    Perché vuoi entrare nella Setta del Semmen? <span class="required">*</span>
+                  </label>
+                  <textarea id="motivazione" name="motivazione" class="form-textarea"
+                            placeholder="Sii onesto. I Grandi Maestri rilevano le bugie con il 94% di accuratezza..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="flosscio">
+                    Ce l'hai flosscio?
+                  </label>
+                  <select id="flosscio" name="flosscio" class="form-select">
+                    <option value="">— Risposta —</option>
+                    <option>Si</option>
+                    <option>No</option>
+                  </select>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="step-nav">
+              <button type="button" class="btn btn--ghost" data-prev>← Indietro</button>
+              <button type="button" class="btn btn--primary" data-next>
+                Prosegui → Regolamento
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: Regolamento -->
+          <div class="form-step" data-step="3">
+            <div class="card card--gold">
+              <div class="card__header">
+                <h3 style="font-size:1.3rem;">III. I 10 Comandamenti</h3>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-top:0.3rem;">
+                  Leggi attentamente. La firma è vincolante per l'eternità.
+                </p>
+              </div>
+              <div class="card__body">
+                <div class="regolamento-box">
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">I</span>
+                    <div class="regolamento-item__text">
+                      Non avere altro Dio al di fuori del Semmen di Solaire 
+                    </div>
+                  </div>
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">II</span>
+                    <div class="regolamento-item__text">
+                      Mai paccare un concilio del Semmen
+                    </div>
+                  </div>
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">III</span>
+                    <div class="regolamento-item__text">
+                      Onora e santifica le feste del Semmen
+                    </div>
+                  </div>
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">IV</span>
+                    <div class="regolamento-item__text">
+                      Non insultare il Semmen invano
+                    </div>
+                  </div>
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">V</span>
+                    <div class="regolamento-item__text">
+                      Raggiungi sempre il Brodo Primordiale
+                    </div>
+                  </div>
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">VI</span>
+                    <div class="regolamento-item__text">
+                      Non desiderare le sacerdotesse del Semmen d'altri
+                    </div>
+                  </div>
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">VII</span>
+                    <div class="regolamento-item__text">
+                      Non uccidere il Semmen
+                    </div>
+                  </div>
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">VIII</span>
+                    <div class="regolamento-item__text">
+                      Non espellere il Semmen in maniera impura
+                    </div>
+                  </div>
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">IX</span>
+                    <div class="regolamento-item__text">
+                      Non rubare il Semmen
+                    </div>
+                  </div>
+                  <div class="regolamento-item">
+                    <span class="regolamento-item__num">X</span>
+                    <div class="regolamento-item__text">
+                      HAIL SEMMEN
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group mt-3">
+                  <label class="form-checkbox">
+                    <input type="checkbox" id="accept-regolamento" name="accept_regolamento" required>
+                    <span class="form-checkbox__label">
+                      Ho letto, compreso, e accetto il Regolamento Sacro della Setta del Semmen
+                      nella sua interezza.
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-nav">
+              <button type="button" class="btn btn--ghost" data-prev>← Indietro</button>
+              <button type="button" class="btn btn--primary" data-next>
+                Prosegui → Giuramento
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 4: Giuramento -->
+          <div class="form-step" data-step="4">
+            <div class="card card--gold">
+              <div class="card__header">
+                <h3 style="font-size:1.3rem;">IV. Il Giuramento d'Iniziazione</h3>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-top:0.3rem;">
+                  Pronuncia il giuramento ad alta voce. Solo allora la candidatura sarà valida.
+                </p>
+              </div>
+              <div class="card__body">
+                <div class="alert alert--info">
+                  <strong>Istruzioni per il Rito:</strong> Alzati in piedi. Raddrizza la schiena.
+                  Con le dita indice e medio unite aperte della mano destra, le altre chiuse, mano alttezza testa. 
+                  Pronuncia le seguenti parole ad alta voce con tono solenne.
+                  Non importa che nessuno ti senta. La Setta sa.
+                </div>
+
+                <div class="oath-box">
+                  <p class="oath-text">
+                    "Io, candidato alla Setta del Semmen,<br>
+                    giuro di portare il Semmen con me,<br>
+                    di rispettare i fratelli e le sorelle dell'Ordine,
+                    sempre e per sempre... HAIL SEMMEN! <br>
+                  </p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-checkbox">
+                    <input type="checkbox" id="accept-giuramento" name="accept_giuramento" required>
+                    <span class="form-checkbox__label">
+                      Ho pronunciato il Giuramento.
+                    </span>
+                  </label>
+                </div>
+
+                <div id="send-error" class="alert alert--error hidden" style="margin-top:1rem;"></div>
+              </div>
+            </div>
+
+            <div class="step-nav">
+              <button type="button" class="btn btn--ghost" data-prev>← Indietro</button>
+              <button type="submit" class="btn btn--primary" id="submit-btn">
+                <div class="loading__spinner hidden" id="submit-spinner" style="width:16px;height:16px;border-width:2px;"></div>
+                <span id="submit-text">Pronuncia il Giuramento e Candidati</span>
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- SIDEBAR INFO -->
+      <aside class="candidatura-sidebar">
+        <div class="info-block">
+          <div class="status-indicator">
+            <div class="pulse"></div>
+            Candidature Aperte
+          </div>
+          <p class="info-block__text" style="font-size:0.9rem;">
+            La Setta del Semmen accetta candidature tutto l'anno,
+            tranne il 29 febbraio, considerato giorno di cattivo auspicio.
+          </p>
+        </div>
+
+        <div class="info-block">
+          <p class="info-block__title">Cosa Succede Dopo</p>
+          <p class="info-block__text" style="font-size:0.9rem;">
+            I Grandi Maestri esamineranno la tua candidatura entro
+            <strong>7-21 giorni lavorativi</strong>.
+            <br><br>
+            Se accettato, riceverai istruzioni per il Rito di Iniziazione Completo.
+            <br><br>
+            Se rifiutato, riceverai un meme di consolazione.
+          </p>
+        </div>
+
+        <div class="info-block" style="border-color:var(--crimson);background:rgba(122,26,26,0.08);">
+          <p class="info-block__title" style="color:var(--crimson-bright);">⚠ Avvisi Legali</p>
+          <p class="info-block__text" style="font-size:0.82rem;">
+            La Setta del Semmen non è responsabile per:
+            perdita di produttività, crisi esistenziali,
+            dipendenza da meme, alienazione familiare,
+            o eccessiva presenza online.
+          </p>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo seal-container"></div>
+        <span class="footer__name">La Setta del Semmen</span>
+      </div>
+      <div class="footer__legal">
+        © Anno Domini MMXXIV · Tutti i diritti riservati<br>
+        La candidatura non garantisce l'ammissione
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/candidatura.js"></script>
+</body>
+</html>

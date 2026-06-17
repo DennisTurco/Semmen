@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Archivio — La Setta del Semmen</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Shake animation per errore password */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-6px); }
+      40%,80% { transform: translateX(6px); }
+    }
+    .shake { animation: shake 0.4s ease; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <div class="navbar__logo seal-container"></div>
+        La Setta del Semmen
+      </a>
+      <ul class="navbar__nav">
+        <li><a href="index.html">Sanctuarium</a></li>
+        <li><a href="wiki.html">Archivio</a></li>
+        <li><a href="candidatura.html">Candidati</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- PASSWORD OVERLAY -->
+  <div class="pw-overlay" id="pw-overlay">
+    <div class="pw-box">
+      <div class="pw-box__seal seal-container"></div>
+      <h2 class="pw-box__title" id="pw-title">Archivio Riservato</h2>
+      <p class="pw-box__subtitle" id="pw-subtitle">Inserisci il Codice di Accesso</p>
+
+      <div class="form-group" style="text-align:left;">
+        <label class="form-label" for="pw-input">Codice di Accesso</label>
+        <input
+          type="password"
+          id="pw-input"
+          class="form-input"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          autofocus
+        >
+        <p class="pw-box__error" id="pw-error"></p>
+      </div>
+
+      <button class="btn btn--primary" id="pw-submit" style="width:100%;">
+        Accedi all'Archivio
+      </button>
+
+      <p style="margin-top:1.5rem;font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);">
+        Accesso non autorizzato perseguito dalla legge della Setta
+      </p>
+    </div>
+  </div>
+
+  <!-- WIKI LAYOUT (nascosto finché non autenticato) -->
+  <div id="wiki-main" class="wiki-layout hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar__section">
+        <div class="wiki-sidebar__label" style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--success-bright);display:inline-block;"></span>
+          Archivio Attivo
+        </div>
+      </div>
+
+      <div id="wiki-nav">
+        <!-- Popolato da wiki.js -->
+        <div class="loading" style="padding:1rem 1.5rem;">
+          <div class="loading__spinner"></div>
+          <span style="font-size:0.8rem;">Caricamento...</span>
+        </div>
+      </div>
+
+      <div class="wiki-sidebar__section" style="margin-top:auto;border-top:1px solid var(--border);padding-top:1.5rem;">
+        <button
+          onclick="sessionStorage.removeItem('semmen_wiki_auth'); location.reload();"
+          class="btn btn--ghost"
+          style="width:100%;font-size:0.75rem;"
+        >
+          Blocca Archivio
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="wiki-content">
+      <div id="wiki-page-meta"></div>
+      <h1 id="wiki-page-title" style="margin-bottom:1rem;"></h1>
+      <div id="wiki-body">
+        <div class="wiki-placeholder">
+          <div class="wiki-placeholder__seal seal-container" style="width:80px;height:80px;margin:0 auto 1.5rem;opacity:0.3;"></div>
+          <p style="color:var(--text-muted);">Seleziona un documento dall'archivio.</p>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo seal-container"></div>
+        <span class="footer__name">Archivio — La Setta del Semmen</span>
+      </div>
+      <div class="footer__legal">
+        CLASSIFICATO · SOLO MEMBRI INIZIATI
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    // Applica testi dall'config
+    document.getElementById('pw-title').textContent    = CONFIG.wiki.accessTitle;
+    document.getElementById('pw-subtitle').textContent = CONFIG.wiki.accessSubtitle;
+  </script>
+  <script src="js/wiki.js"></script>
+</body>
+</html>
