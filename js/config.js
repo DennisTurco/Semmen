@@ -9,7 +9,7 @@ const CONFIG = {
 
   /* ── WIKI ──────────────────────────────────────────────────── */
   wiki: {
-    password: "",
+    password: "__WIKI_PASSWORD__",
     accessTitle: "Archivio Riservato",
     accessSubtitle: "Inserisci il Codice di Accesso",
   },
@@ -25,10 +25,10 @@ const CONFIG = {
 
   /* ── STATISTICHE HOMEPAGE ─────────────────────────────────── */
   stats: {
-    members:  "XIV",
+    members:  "∞",
     memes:    "∞",
-    heresies: "III",
-    years:    "I",
+    heresies: "I",
+    years:    "V",
   },
 
 };
