@@ -199,7 +199,7 @@ e intervengono nelle dispute teologiche più gravi.
 
 ---
 
-### ✦✦✦ Ahhckmed, Creatore del Semmen
+### ✦✦✦ Arconte del Semmen
 
 *Grado III — Nominato dal gruppo.*
 
@@ -217,6 +217,16 @@ Ha il potere di ammonire i membri.
 Colui che è almeno a livello Chiurpy. Dopo un grande periodo di astinenza cerca di arrivare allo stadio supremo, **Brodo Primordiale**.
 
 **Privilegi:** È supportato nel suo intento da tutti i membri. Gli si perdona quasi tutto, a patto che Ahckmed intervenga.
+
+---
+
+### ✦✦ Controllore del Semmen
+
+*Grado IV — Nominato dal gruppo.*
+
+È un umile controllore.
+
+**Privilegi:** Ha l'onore di attestare gli stadi altrui del Semmen.
 
 ---
 

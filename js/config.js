@@ -37,6 +37,74 @@ const CONFIG = {
     ],
   },
 
+  /* ── DISCEPOLI ────────────────────────────────────────────── */
+  discepoli: [
+    {
+      grado:   "Ahckmed, Creatore del Semmen",
+      simbolo: "✦✦✦✦✦",
+      membri:  [
+        { nome: "Denno", nota: "Fondatore" },
+      ],
+    },
+    {
+      grado:   "Grande Anziano",
+      simbolo: "✦✦✦✦",
+      membri:  [
+        // { nome: "Nome" },
+      ],
+    },
+    {
+      grado:   "Arconte del Semmen",
+      simbolo: "✦✦✦✦",
+      membri:  [
+        { nome: "Vince" },
+      ],
+    },
+    {
+      grado:   "Custode del Semmen",
+      simbolo: "✦✦✦",
+      membri:  [
+        { nome: "Dona" },
+        { nome: "Giorgio" }
+      ],
+    },
+    {
+      grado:   "Menarca del Semmen",
+      simbolo: "✦✦✦",
+      membri:  [
+        { nome: "Fra" },
+      ],
+    },
+    {
+      grado:   "Controllore del Semmen",
+      simbolo: "✦✦",
+      membri:  [
+        { nome: "Filippo" },
+      ],
+    },
+    {
+      grado:   "Apprendista del Semmen",
+      simbolo: "✦✦",
+      membri:  [
+        // { nome: "Nome" },
+      ],
+    },
+    {
+      grado:   "Adepto del Semmen",
+      simbolo: "✦",
+      membri:  [
+        // { nome: "Fra" },
+      ],
+    },
+    {
+      grado:   "Candidato",
+      simbolo: "◯",
+      membri:  [
+        // { nome: "Nome" },
+      ],
+    },
+  ],
+
   /* ── STATISTICHE HOMEPAGE ─────────────────────────────────── */
   stats: {
     members:  "∞",
