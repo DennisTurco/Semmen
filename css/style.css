@@ -141,6 +141,7 @@ li { margin-bottom: 0.4em; }
   align-items: center;
   justify-content: space-between;
   height: 56px;
+  position: relative;
 }
 
 .navbar__brand {
@@ -166,6 +167,9 @@ li { margin-bottom: 0.4em; }
   align-items: center;
   gap: 0.25rem;
   list-style: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .navbar__nav a {
@@ -247,6 +251,21 @@ li { margin-bottom: 0.4em; }
   align-items: center;
 }
 
+.navbar__nav-disabled {
+  display: block;
+  padding: 0.4rem 0.9rem;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: default;
+  user-select: none;
+}
+
 @media (max-width: 700px) {
   .navbar__burger { display: flex; }
 
@@ -268,8 +287,14 @@ li { margin-bottom: 0.4em; }
 
   .navbar__menu.is-open { display: flex; }
 
-  .navbar__nav { flex-direction: column; width: 100%; }
+  .navbar__nav {
+    position: static;
+    transform: none;
+    flex-direction: column;
+    width: 100%;
+  }
   .navbar__nav a { padding: 0.65rem 0.75rem; }
+  .navbar__nav-disabled { padding: 0.65rem 0.75rem; }
 
   .navbar__donate {
     margin-left: 0;
@@ -580,6 +605,23 @@ li { margin-bottom: 0.4em; }
 }
 
 .feature-card:hover .feature-card__title { color: var(--gold); }
+
+a.feature-card { cursor: pointer; }
+
+a.feature-card::after {
+  content: '→';
+  position: absolute;
+  bottom: 1.25rem;
+  right: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  transition: color var(--transition), transform var(--transition);
+}
+
+a.feature-card:hover::after {
+  color: var(--gold);
+  transform: translateX(3px);
+}
 
 .feature-card__desc {
   color: var(--text-secondary);
@@ -1066,6 +1108,13 @@ li { margin-bottom: 0.4em; }
   background: var(--bg-root);
   padding: 0.1rem 0.4rem;
   border-radius: 2px;
+}
+
+.wiki-sidebar__item-lock {
+  float: right;
+  font-size: 10px;
+  opacity: 0.45;
+  margin-left: 0.25rem;
 }
 
 .wiki-content {

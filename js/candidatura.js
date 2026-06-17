@@ -143,7 +143,8 @@ form.addEventListener('submit', async e => {
       // Domande sacre
       find_us:      data.find_us,
       motivazione:  data.motivazione,
-      flosscio:     data.find_us,
+      flosscio:     data.flosscio,
+      flosscio:     data.risposta_giusta,
 
       // Timestamp
       data_candidatura: new Date().toLocaleString('it-IT'),
@@ -201,7 +202,7 @@ function showSendError(err) {
 
   const alertEl = document.getElementById('send-error');
   alertEl.classList.remove('hidden');
-  alertEl.textContent = `Errore di trasmissione: ${err.text || err.message || 'Sconosciuto'}. Riprova o contatta il Gran Maestro.`;
+  alertEl.textContent = `Errore di trasmissione: ${err.text || err.message || 'Sconosciuto'}. Riprova o contatta il Ahckmed, Creatore del Semmen.`;
 }
 
 /* ── Codice candidato ───────────────────────────────────────── */
