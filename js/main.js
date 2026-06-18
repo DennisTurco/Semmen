@@ -68,20 +68,8 @@ const SEAL_SVG = `<svg class="seal" viewBox="0 0 200 200" xmlns="http://www.w3.o
     <textPath href="#outerRing" startOffset="3%">· LA SETTA DEL SEMMEN · EST. MMXXIV ·</textPath>
   </text>
 
-  <!-- Sole di Solaire -->
-  <g transform="translate(100,100)" fill="currentColor" opacity="0.95">
-    <!-- 8 raggi diamantati -->
-    <polygon points="0,-47 6,-17 0,-9 -6,-17"/>
-    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(45)"/>
-    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(90)"/>
-    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(135)"/>
-    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(180)"/>
-    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(225)"/>
-    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(270)"/>
-    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(315)"/>
-    <!-- Cerchio centrale -->
-    <circle r="14"/>
-  </g>
+  <!-- Stella centrale -->
+  <image href="img/star.png" x="37" y="37" width="126" height="126"/>
 </svg>`;
 
 /* Inietta il sigillo in tutti gli elementi .seal-container */
