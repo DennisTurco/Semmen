@@ -19,6 +19,11 @@ body {
   font-size: var(--text-lg);
   line-height: 1.7;
   min-height: 100vh;
+  cursor: url('../img/star-cursor.png') 16 16, auto;
+}
+
+a, button, [role="button"], label, .feature-card, .wiki-sidebar__item, .btn, select, input[type="checkbox"] {
+  cursor: url('../img/star-cursor.png') 16 16, pointer;
 }
 
 /* Noise texture overlay */
@@ -157,8 +162,8 @@ li { margin-bottom: 0.4em; }
 .navbar__brand:hover { color: var(--gold); }
 
 .navbar__logo {
-  width: 32px;
-  height: 32px;
+  width: 45px;
+  height: 45px;
   flex-shrink: 0;
 }
 
@@ -1450,4 +1455,125 @@ a.feature-card:hover::after {
   .step-nav .btn { width: 100%; justify-content: center; }
   .footer__inner { flex-direction: column; align-items: center; text-align: center; }
   .footer__legal { text-align: center; }
+}
+
+/* ============================================================
+   SPLASH SCREEN
+   ============================================================ */
+#splash {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-root);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  transition: opacity 0.9s ease;
+}
+
+#splash.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash__seal {
+  width: 130px;
+  height: 130px;
+  opacity: 0;
+  animation: splashReveal 1.2s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+}
+
+@keyframes splashReveal {
+  from { opacity: 0; transform: scale(0.4) rotate(-120deg); }
+  to   { opacity: 1; transform: scale(1)   rotate(0deg); }
+}
+
+.splash__text {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  min-height: 1.2em;
+  opacity: 0;
+  animation: fadeIn 0.4s ease 1s forwards;
+}
+
+.splash__line {
+  width: 0;
+  height: 1px;
+  background: var(--gold-dim);
+  animation: lineGrow 0.8s ease 0.8s forwards;
+}
+
+@keyframes lineGrow {
+  to { width: 160px; }
+}
+
+/* ============================================================
+   GLITCH HERO TITLE
+   ============================================================ */
+.hero__title {
+  position: relative;
+}
+
+.hero__title::before,
+.hero__title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  clip-path: inset(0 0 100% 0);
+  pointer-events: none;
+}
+
+.hero__title::before {
+  color: var(--crimson-bright);
+  animation: glitchTop 6s infinite steps(1) 2s;
+  left: 3px;
+}
+
+.hero__title::after {
+  color: var(--gold-bright);
+  animation: glitchBot 6s infinite steps(1) 2.1s;
+  left: -3px;
+}
+
+@keyframes glitchTop {
+  0%,  82%, 100% { clip-path: inset(0 0 100% 0); opacity: 0; transform: none; }
+  83% { clip-path: inset(5%  0 60% 0); opacity: 0.75; transform: translateX(4px); }
+  84% { clip-path: inset(30% 0 40% 0); opacity: 0.75; transform: translateX(-3px); }
+  85% { clip-path: inset(0 0 100% 0);  opacity: 0; }
+  87% { clip-path: inset(55% 0 10% 0); opacity: 0.6;  transform: translateX(5px); }
+  88% { clip-path: inset(0 0 100% 0);  opacity: 0; }
+}
+
+@keyframes glitchBot {
+  0%,  83%, 100% { clip-path: inset(0 0 100% 0); opacity: 0; transform: none; }
+  84% { clip-path: inset(40% 0 30% 0); opacity: 0.65; transform: translateX(-4px); }
+  86% { clip-path: inset(0 0 100% 0);  opacity: 0; }
+  88% { clip-path: inset(65% 0 5%  0); opacity: 0.55; transform: translateX(3px); }
+  89% { clip-path: inset(0 0 100% 0);  opacity: 0; }
+}
+
+/* ============================================================
+   PARTICLES CANVAS
+   ============================================================ */
+#particles-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero > *:not(#particles-canvas) {
+  position: relative;
+  z-index: 1;
 }

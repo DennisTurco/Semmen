@@ -178,10 +178,6 @@ function showSuccess(data) {
   form.parentElement.classList.add('hidden');
   successScreen.classList.add('visible');
 
-  // Genera codice candidato
-  const code = generateCandidateCode(data.nome || 'IGNOTO');
-  document.getElementById('candidate-code').textContent = code;
-
   // Re-inject seal
   document.querySelectorAll('.seal-container').forEach(el => {
     if (typeof SEAL_SVG !== 'undefined') {
@@ -190,6 +186,43 @@ function showSuccess(data) {
       if (svg) svg.style.color = 'var(--gold)';
     }
   });
+
+  // Staggered fade-in per ogni figlio della success screen
+  const children = Array.from(successScreen.children);
+  children.forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(18px)';
+    el.style.transition = `opacity 0.55s ease ${i * 0.14}s, transform 0.55s ease ${i * 0.14}s`;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.opacity = '';
+      el.style.transform = '';
+    }));
+  });
+
+  // Typewriter / scramble sul codice candidato
+  const code  = generateCandidateCode(data.nome || 'IGNOTO');
+  const codeEl = document.getElementById('candidate-code');
+  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const DURATION = 900;
+  codeEl.textContent = code.replace(/[^-]/g, CHARS[0]);
+
+  setTimeout(() => {
+    const startTime = Date.now();
+    function scrambleStep() {
+      const elapsed  = Date.now() - startTime;
+      const progress = Math.min(elapsed / DURATION, 1);
+      const revealed = Math.floor(progress * code.length);
+      let display = '';
+      for (let j = 0; j < code.length; j++) {
+        if (j < revealed) display += code[j];
+        else display += code[j] === '-' ? '-' : CHARS[Math.floor(Math.random() * CHARS.length)];
+      }
+      codeEl.textContent = display;
+      if (progress < 1) requestAnimationFrame(scrambleStep);
+      else codeEl.textContent = code;
+    }
+    requestAnimationFrame(scrambleStep);
+  }, children.length * 140 + 100);
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
