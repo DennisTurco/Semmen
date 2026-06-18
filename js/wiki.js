@@ -102,48 +102,7 @@ author: Il Ahckmed, Creatore del Semmen Fondatore
 
 # Storia della Setta del Semmen
 
-## Le Origini Oscure
-
-La Setta del Semmen non è nata in un momento preciso.
-Come tutte le grandi forze dell'universo, è *emersa* — organicamente, inevitabilmente —
-da un gruppo di individui che si trovavano nello stesso posto digitale nello stesso momento.
-
-Si dice che il Meme Fondatore apparve durante una notte di fine estate.
-Nessuno ricorda esattamente cosa fosse. Tutti ricordano di aver riso.
-
----
-
-## Il Periodo Formativo
-
-Nei primi mesi, la Setta non aveva nome, non aveva struttura, non aveva senso.
-Aveva solo:
-
-- Un gruppo WhatsApp con un nome imbarazzante
-- Una serie di inside joke incomprensibili per chiunque non fosse presente
-- Una quantità spropositata di tempo libero
-
-Questo fu sufficiente.
-
----
-
-## La Fondazione Ufficiale
-
-La Setta del Semmen viene ufficialmente fondata nell'Anno Domini MMXXIV,
-quando il Ahckmed, Creatore del Semmen Fondatore dichiarò solennemente:
-
-> *"Ok ragazzi, facciamo una roba seria."*
-
-Nessuno capì cosa intendesse. Tutti accettarono.
-
----
-
-## L'Era Moderna
-
-Oggi la Setta conta **XIV membri attivi**, un archivio wiki,
-un processo di candidatura formalizzato, e almeno tre controversie teologiche
-ancora irrisolte riguardanti la corretta pronuncia di certi meme.
-
-La Setta continua a crescere. Lentamente. Con dignità.
+...
 
 ---
 
@@ -151,16 +110,11 @@ La Setta continua a crescere. Lentamente. Con dignità.
 
 | Anno | Evento |
 |------|--------|
-| Anno 0 | Apparizione del Meme Fondatore |
-| Anno 0, mese 2 | Prima disputa interna (irrisolta) |
-| Anno 0, mese 6 | Nomina del primo Ahckmed, Creatore del Semmen |
-| Anno 1 | Fondazione ufficiale della Setta |
-| Anno 1, mese 3 | Prima candidatura esterna accettata |
-| Anno 1, mese 8 | Creazione di questo archivio |
+
 
 ---
 
-> *"Chi dimentica la storia del meme è condannato a ripetere le stesse battute."*`,
+> *"..."*`,
 
 "gerarchia": `---
 title: Gerarchia Interna
@@ -240,6 +194,15 @@ Colui che è almeno a livello Chiurpy. Dopo un grande periodo di astinenza cerca
 
 ---
 
+### ✦ Sacerdotessa del Semmen
+
+*Grado V — Meretrice del membro del Semmen*
+
+Questa carica viene assegnata automaticamente alle levatrici dei membri del Semmen.
+Ad esse va il messimo rispetto e la massima devozione, sono responsabili dell'estrazione del Semmen di noi membri.
+
+---
+
 ### ✦ Adepto del Semmen
 
 *Grado V — Membro standard.*
@@ -262,8 +225,10 @@ Accesso limitato. Nessun diritto di voto. Nessuna colpa se rifiutato.
 La promozione avviene per:
 
 - **Merito** — contributo eccezionale alla cultura della Setta
-- **Anzianità** — sopravvivenza prolungata senza venire bannato
-- **Capriccio del Ahckmed, Creatore del Semmen** — il motivo più comune
+- **Anzianità** — sopravvivenza prolungata senza venire scomunicato
+- **Pagamento delle indulgenze** — è possibile pagare per aumentare il proprio grado all'interno dell'ordine, un po come succede per i pay to win.
+- **Capriccio del Ahckmed**
+- **Attraverso richiesta esplicita** — possibile presentare richiesta che verrà poi messa a votazione da tutto l'ordine.
 
 ---
 
@@ -272,7 +237,7 @@ La promozione avviene per:
 La destituzione avviene per:
 
 - Violazione del Regolamento Sacro
-- Motivi non meglio specificati da Ahckmed, Creatore del Semmen
+- Attraverso richiesta di uno o più membri
 
 ---
 

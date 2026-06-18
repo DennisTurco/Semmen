@@ -23,20 +23,6 @@ const CONFIG = {
     subjectPrefix: "[CANDIDATURA SEMMEN]",
   },
 
-  /* ── SHOP ─────────────────────────────────────────────────── */
-  shop: {
-    title:          "Emporio della Setta",
-    subtitle:       "Reliquie Ufficiali dell'Ordine",
-    description:    "Il negozio sacro della Setta è in fase di allestimento.<br>Presto potrai acquisire le reliquie ufficiali dell'Ordine.<br>Preparati all'indottrinamento commerciale.",
-    badge:          "Prossimamente",
-    sectionLabel:   "Catalogo Sacro",
-    sectionTitle:   "Le Reliquie",
-    sectionSubtitle: "Oggetti di potere supremo per i fedeli dell'Ordine",
-    products: [
-      // { icon: '👕', name: 'T-Shirt', description: 'Descrizione...', price: '€19.99', available: false },
-    ],
-  },
-
   /* ── DISCEPOLI ────────────────────────────────────────────── */
   discepoli: [
     {
@@ -87,6 +73,15 @@ const CONFIG = {
       simbolo: "✦✦",
       membri:  [
         // { nome: "Nome" },
+      ],
+    },
+    {
+      grado:   "Sacerdotessa del Semmen",
+      simbolo: "✦✦",
+      membri:  [
+        { nome: "Mariachiara", nota: "Meretrice di Ahckmed" },
+        { nome: "Michela", nota: "Meretrice di Vince" },
+        { nome: "Tipa di Giorgio", nota: "Meretrice di Giorgio" },
       ],
     },
     {
