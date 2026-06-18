@@ -58,9 +58,10 @@
         Conserva il tuo codice candidato.
       </p>
       <div class="success-screen__code" id="candidate-code">SMM-0000-XXX</div>
-      <p style="color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:2rem;">
+      <p style="color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0;">
         Codice Candidatura — Non Condividere
       </p>
+      <img src="gif/praise-the-sun.gif" alt="Praise the Sun" style="width:100%;max-width:360px;display:block;margin:0 auto 2rem;">
       <a href="index.html" class="btn btn--outline">Torna al Sanctuarium</a>
     </div>
 
@@ -447,6 +448,97 @@
       </div>
     </div>
   </footer>
+
+  <!-- AUDIO AMBIENTE -->
+  <!-- Metti il tuo file nella cartella audio/ con nome gregoriano.mp3 -->
+  <audio id="ambient-audio" loop preload="none">
+    <source src="audio/gregoriano.mp3" type="audio/mpeg">
+    <source src="audio/gregoriano.ogg" type="audio/ogg">
+  </audio>
+
+  <!-- Bottone audio fisso -->
+  <button id="audio-toggle" aria-label="Attiva musica" title="Attiva/disattiva canti gregoriani">
+    <svg id="audio-icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M9 4l10 8-10 8V4z"/>
+      <path d="M3 4h2v16H3z" opacity="0.5"/>
+    </svg>
+    <svg id="audio-icon-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+      <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+    </svg>
+    <span id="audio-label">Canti Gregoriani</span>
+  </button>
+
+  <style>
+    #audio-toggle {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(8,8,8,0.92);
+      border: 1px solid var(--border-gold);
+      border-radius: 2rem;
+      color: var(--gold);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background var(--transition), box-shadow var(--transition);
+    }
+    #audio-toggle:hover {
+      background: var(--gold-glow);
+      box-shadow: 0 0 12px rgba(201,168,76,0.2);
+    }
+    #audio-toggle.is-playing {
+      border-color: var(--gold);
+      box-shadow: 0 0 8px rgba(201,168,76,0.15);
+    }
+  </style>
+
+  <script>
+    (function() {
+      const audio  = document.getElementById('ambient-audio');
+      const btn    = document.getElementById('audio-toggle');
+      const iconPlay  = document.getElementById('audio-icon-play');
+      const iconPause = document.getElementById('audio-icon-pause');
+      const label  = document.getElementById('audio-label');
+
+      audio.volume = 0.35;
+
+      // Autoplay se arrivato dalla navbar
+      if (sessionStorage.getItem('semmen_audio_autoplay') === '1') {
+        sessionStorage.removeItem('semmen_audio_autoplay');
+        audio.play().then(() => {
+          iconPlay.style.display  = 'none';
+          iconPause.style.display = '';
+          label.textContent = 'In ascolto...';
+          btn.classList.add('is-playing');
+        }).catch(() => {});
+      }
+
+      btn.addEventListener('click', () => {
+        if (audio.paused) {
+          audio.play().then(() => {
+            iconPlay.style.display  = 'none';
+            iconPause.style.display = '';
+            label.textContent = 'In ascolto...';
+            btn.classList.add('is-playing');
+          }).catch(() => {});
+        } else {
+          audio.pause();
+          iconPlay.style.display  = '';
+          iconPause.style.display = 'none';
+          label.textContent = 'Canti Gregoriani';
+          btn.classList.remove('is-playing');
+        }
+      });
+    })();
+  </script>
 
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>

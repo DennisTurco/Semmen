@@ -31,6 +31,12 @@
   links.forEach(a => {
     const href = a.getAttribute('href').split('/').pop();
     if (href === path) a.classList.add('active');
+    // Segna flag audio quando si clicca "Candidati"
+    if (href === 'candidatura.html') {
+      a.addEventListener('click', () => {
+        sessionStorage.setItem('semmen_audio_autoplay', '1');
+      });
+    }
   });
 })();
 
@@ -62,15 +68,20 @@ const SEAL_SVG = `<svg class="seal" viewBox="0 0 200 200" xmlns="http://www.w3.o
     <textPath href="#outerRing" startOffset="3%">· LA SETTA DEL SEMMEN · EST. MMXXIV ·</textPath>
   </text>
 
-  <!-- Lettera centrale -->
-  <text x="100" y="118" font-family="'IM Fell English', Georgia, serif" font-size="72"
-        fill="currentColor" text-anchor="middle" opacity="0.95">S</text>
-
-  <!-- Linee decorative laterali -->
-  <line x1="30" y1="100" x2="52" y2="100" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
-  <line x1="148" y1="100" x2="170" y2="100" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
-  <circle cx="30" cy="100" r="2" fill="currentColor" opacity="0.4"/>
-  <circle cx="170" cy="100" r="2" fill="currentColor" opacity="0.4"/>
+  <!-- Sole di Solaire -->
+  <g transform="translate(100,100)" fill="currentColor" opacity="0.95">
+    <!-- 8 raggi diamantati -->
+    <polygon points="0,-47 6,-17 0,-9 -6,-17"/>
+    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(45)"/>
+    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(90)"/>
+    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(135)"/>
+    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(180)"/>
+    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(225)"/>
+    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(270)"/>
+    <polygon points="0,-47 6,-17 0,-9 -6,-17" transform="rotate(315)"/>
+    <!-- Cerchio centrale -->
+    <circle r="14"/>
+  </g>
 </svg>`;
 
 /* Inietta il sigillo in tutti gli elementi .seal-container */
