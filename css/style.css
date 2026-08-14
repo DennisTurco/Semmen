@@ -587,12 +587,22 @@ li { margin-bottom: 0.4em; }
   background: linear-gradient(135deg, var(--gold-glow) 0%, transparent 60%);
   opacity: 0;
   transition: opacity var(--transition);
+  pointer-events: none;
 }
 
 .feature-card:hover::before { opacity: 1; }
 
 .feature-card__icon {
   font-size: 2rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.feature-card__image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
   margin-bottom: 1rem;
   display: block;
 }
@@ -720,6 +730,52 @@ a.feature-card:hover::after {
   margin-top: 0.75rem;
   min-height: 1.2em;
 }
+
+/* ============================================================
+   MODAL GENERICO (es. richiesta acquisto shop)
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.modal-overlay.hidden { display: none; }
+
+.modal-box {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 460px;
+  text-align: center;
+  box-shadow: var(--shadow-lg), var(--shadow-gold);
+  margin: auto;
+}
+
+.modal-box__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.modal-box__close:hover { color: var(--gold); }
 
 /* ============================================================
    FORM ELEMENTS

@@ -21,6 +21,12 @@ const CONFIG = {
     templateId: "__EMAILJS_TEMPLATE_ID__",
     recipient:  "dennisturco@gmail.com",
     subjectPrefix: "[CANDIDATURA SEMMEN]",
+
+    /* Template dedicato alle richieste di acquisto dello shop.
+       Può coincidere con templateId se il template EmailJS usa
+       variabili generiche come {{subject}} e {{message}}. */
+    shopTemplateId: "__EMAILJS_SHOP_TEMPLATE_ID__",
+    shopSubjectPrefix: "[ORDINE SHOP SEMMEN]",
   },
 
   /* ── DISCEPOLI ────────────────────────────────────────────── */

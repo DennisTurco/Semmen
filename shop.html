@@ -36,7 +36,6 @@
     </div>
   </nav>
 
-  <!-- SHOP COMING SOON -->
   <section class="hero" style="padding-bottom: 6rem;">
     <div class="hero__seal seal-container"></div>
 
@@ -48,25 +47,10 @@
     </div>
 
     <p class="hero__description" id="shop-description">
-      Il negozio sacro della Setta è in fase di allestimento.<br>
-      Presto potrai acquisire le reliquie ufficiali dell'Ordine.<br>
+      Il negozio sacro della Setta non è ancora definitivo.<br>
+      Alcuni articoli sono ancora in fase di elaborazione.<br>
       Preparati all'indottrinamento commerciale.
     </p>
-
-    <div style="margin: 2.5rem 0;">
-      <span style="
-        display: inline-block;
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        color: var(--gold);
-        border: 1px solid var(--border-gold);
-        padding: 0.4rem 1.2rem;
-        border-radius: var(--radius-sm);
-        background: var(--gold-glow);
-      " id="shop-badge">Prossimamente</span>
-    </div>
 
     <p class="hero__classified">
       EMPORIO CLASSIFICATO &nbsp;·&nbsp; ACCESSO RISERVATO AI FEDELI &nbsp;·&nbsp; GRADO AURUM
@@ -90,6 +74,56 @@
     </div>
   </section>
 
+  <!-- MODAL RICHIESTA ACQUISTO -->
+  <div class="modal-overlay hidden" id="order-modal">
+    <div class="modal-box">
+      <button class="modal-box__close" id="order-modal-close" aria-label="Chiudi" type="button">&times;</button>
+
+      <h2 class="pw-box__title">Richiedi Acquisto</h2>
+      <p class="pw-box__subtitle" id="order-product-name">Prodotto</p>
+
+      <form id="order-form">
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label" for="order-nome">Nome e Cognome <span class="required">*</span></label>
+          <input type="text" id="order-nome" name="nome" class="form-input" placeholder="Il tuo nome" required>
+        </div>
+
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label" for="order-email">Email <span class="required">*</span></label>
+          <input type="email" id="order-email" name="email" class="form-input" placeholder="tua@email.com" required>
+        </div>
+
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label" for="order-telefono">Telefono</label>
+          <input type="tel" id="order-telefono" name="telefono" class="form-input" placeholder="Facoltativo">
+        </div>
+
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label" for="order-quantita">Quantità</label>
+          <input type="number" id="order-quantita" name="quantita" class="form-input" min="1" value="1">
+        </div>
+
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label" for="order-note">Note (indirizzo, richieste particolari...)</label>
+          <textarea id="order-note" name="note" class="form-input" rows="3" placeholder="Facoltativo"></textarea>
+        </div>
+
+        <p class="pw-box__error" id="order-error"></p>
+
+        <button type="submit" class="btn btn--primary" style="width:100%;" id="order-submit-btn">
+          <span id="order-submit-text">Conferma Richiesta</span>
+          <span class="loading__spinner hidden" id="order-submit-spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-left:0.5rem;"></span>
+        </button>
+      </form>
+
+      <div class="hidden" id="order-success" style="margin-top:1rem;">
+        <p style="color:var(--gold);font-family:var(--font-mono);font-size:0.9rem;">
+          ✓ Richiesta trasmessa alla Setta. Ti contatteremo presto via email.
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer__inner">
@@ -104,6 +138,7 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/main.js"></script>
   <script>
@@ -120,33 +155,131 @@
 
     // Prodotti
     const grid = document.getElementById('shop-grid');
-    const products = CONFIG.shop && CONFIG.shop.products;
-    if (products && products.length) {
-      grid.innerHTML = products.map(p => `
-        <div class="feature-card" data-reveal style="cursor:default;">
-          <span class="feature-card__icon">${p.icon || '🛍️'}</span>
-          <h3 class="feature-card__title">${p.name}</h3>
-          <p class="feature-card__desc">${p.description}</p>
-          ${p.price ? `<p style="margin-top:0.75rem;font-family:var(--font-mono);font-size:0.8rem;color:var(--gold);letter-spacing:0.1em;">${p.price}</p>` : ''}
-          ${p.available === false ? `<span style="margin-top:0.5rem;display:inline-block;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:0.2rem 0.6rem;border-radius:var(--radius-sm);">Presto Disponibile</span>` : ''}
-        </div>
-      `).join('');
-    } else {
-      // Prodotti placeholder se CONFIG.shop.products non è configurato
-      grid.innerHTML = [
-        { icon: '👕', name: 'T-Shirt del Semmen', description: 'Indossa il sigillo della Setta con orgoglio. Cotone sacro al 100% imbevuto di Semmen allo stato Tofu.', price: 'TBD', available: false },
-        { icon: '🖨️', name: 'Indulgenza', description: 'Indulgenza ufficiale del Sacro Ordine del Semmen prodotta da fratello Giorgio.', price: 'TBD', available: false },
-        { icon: '📿', name: 'Amuleto del Semmen', description: 'Non è un semplice portachiavi, è una reliquia protettiva per i fedeli. Allontana gli eretici. Stampata in 3d sicuramente non dalla stampante del fratello Fra. Vengono usati filamenti Semmici allo stato Tofu', price: 'TBD', available: false },
-      ].map(p => `
-        <div class="feature-card" data-reveal style="cursor:default;">
-          <span class="feature-card__icon">${p.icon}</span>
-          <h3 class="feature-card__title">${p.name}</h3>
-          <p class="feature-card__desc">${p.description}</p>
-          <p style="margin-top:0.75rem;font-family:var(--font-mono);font-size:0.8rem;color:var(--gold);letter-spacing:0.1em;">${p.price}</p>
-          <span style="margin-top:0.5rem;display:inline-block;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:0.2rem 0.6rem;border-radius:var(--radius-sm);">Presto Disponibile</span>
-        </div>
-      `).join('');
+    const configProducts = CONFIG.shop && CONFIG.shop.products;
+    const products = (configProducts && configProducts.length) ? configProducts : [
+      { icon: '', image: 'img/shop/pene-tappo.jpeg', name: 'Tappo Pene', description: 'È un tappo pene. Si può montare sulle bottiglie delle bibite. Permette la fuoriuscita del liquido dalla punta. Articolo stampato con filamenti Semmici allo stato Tofu', price: '4€', available: true },
+      { icon: '👕', name: 'T-Shirt del Semmen', description: 'Indossa il sigillo della Setta con orgoglio. Cotone sacro al 100% imbevuto di Semmen allo stato Tofu.', price: 'TBD', available: false },
+      { icon: '🖨️', name: 'Indulgenza', description: 'Indulgenza ufficiale del Sacro Ordine del Semmen prodotta da fratello Giorgio.', price: 'TBD', available: false },
+      { icon: '📿', name: 'Amuleto del Semmen', description: 'Non è un semplice portachiavi, è una reliquia protettiva per i fedeli. Allontana gli eretici. Stampata in 3d sicuramente non dalla stampante del fratello Fra. Vengono usati filamenti Semmici allo stato Tofu', price: 'TBD', available: false },
+    ];
+
+    grid.innerHTML = products.map((p, i) => `
+      <div class="feature-card" data-reveal style="cursor:default;">
+        ${p.image ? `<img class="feature-card__image" src="${p.image}" alt="${p.name}">` : `<span class="feature-card__icon">${p.icon || '🛍️'}</span>`}
+        <h3 class="feature-card__title">${p.name}</h3>
+        <p class="feature-card__desc">${p.description}</p>
+        ${p.price ? `<p style="margin-top:0.75rem;font-family:var(--font-mono);font-size:0.8rem;color:var(--gold);letter-spacing:0.1em;">${p.price}</p>` : ''}
+        <button
+          type="button"
+          class="btn btn--primary order-btn"
+          style="width:100%;margin-top:1rem;"
+          data-product-index="${i}"
+          ${p.available === false ? 'disabled' : ''}
+        >${p.available === false ? 'Non disponibile' : 'Richiedi acquisto'}</button>
+      </div>
+    `).join('');
+
+    /* ── Modal richiesta acquisto ─────────────────────────────── */
+    const orderModal      = document.getElementById('order-modal');
+    const orderForm       = document.getElementById('order-form');
+    const orderProductName = document.getElementById('order-product-name');
+    const orderSubmitBtn  = document.getElementById('order-submit-btn');
+    const orderSubmitText = document.getElementById('order-submit-text');
+    const orderSubmitSpinner = document.getElementById('order-submit-spinner');
+    const orderError      = document.getElementById('order-error');
+    const orderSuccess    = document.getElementById('order-success');
+
+    let selectedProduct = null;
+
+    function openOrderModal(product) {
+      selectedProduct = product;
+      orderProductName.textContent = `${product.name}${product.price ? ' — ' + product.price : ''}`;
+      orderForm.reset();
+      orderForm.classList.remove('hidden');
+      orderSuccess.classList.add('hidden');
+      orderError.textContent = '';
+      orderSubmitBtn.disabled = false;
+      orderSubmitText.textContent = 'Conferma Richiesta';
+      orderSubmitSpinner.classList.add('hidden');
+      orderModal.classList.remove('hidden');
     }
+
+    function closeOrderModal() {
+      orderModal.classList.add('hidden');
+      selectedProduct = null;
+    }
+
+    grid.querySelectorAll('.order-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.productIndex);
+        openOrderModal(products[idx]);
+      });
+    });
+
+    document.getElementById('order-modal-close').addEventListener('click', closeOrderModal);
+    orderModal.addEventListener('click', e => {
+      if (e.target === orderModal) closeOrderModal();
+    });
+
+    orderForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!selectedProduct) return;
+
+      const fd = new FormData(orderForm);
+      const data = Object.fromEntries(fd.entries());
+
+      orderSubmitBtn.disabled = true;
+      orderSubmitText.textContent = 'Trasmissione in corso...';
+      orderSubmitSpinner.classList.remove('hidden');
+      orderError.textContent = '';
+
+      const templateParams = {
+        to_email:    CONFIG.email.recipient,
+        subject:     `${CONFIG.email.shopSubjectPrefix} ${selectedProduct.name}`,
+        message:
+          `Nuova richiesta di acquisto\n\n` +
+          `Prodotto: ${selectedProduct.name}\n` +
+          `Prezzo: ${selectedProduct.price || 'N/D'}\n\n` +
+          `Nome: ${data.nome}\n` +
+          `Email: ${data.email}\n` +
+          `Telefono: ${data.telefono || 'N/D'}\n` +
+          `Quantità: ${data.quantita || 1}\n` +
+          `Note: ${data.note || 'N/D'}\n\n` +
+          `Data richiesta: ${new Date().toLocaleString('it-IT')}`,
+        prodotto:    selectedProduct.name,
+        prezzo:      selectedProduct.price || 'N/D',
+        nome:        data.nome,
+        email:       data.email,
+        telefono:    data.telefono || 'N/D',
+        quantita:    data.quantita || 1,
+        note:        data.note || 'N/D',
+        data_richiesta: new Date().toLocaleString('it-IT'),
+      };
+
+      const shopTemplateId = CONFIG.email.shopTemplateId || CONFIG.email.templateId;
+
+      if (!CONFIG.email.publicKey || CONFIG.email.publicKey.startsWith('__')) {
+        // Modalità demo: nessuna configurazione EmailJS presente
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        orderForm.classList.add('hidden');
+        orderSuccess.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        emailjs.init(CONFIG.email.publicKey);
+        await emailjs.send(CONFIG.email.serviceId, shopTemplateId, templateParams);
+
+        orderForm.classList.add('hidden');
+        orderSuccess.classList.remove('hidden');
+      } catch (err) {
+        console.error('[Shop] EmailJS error:', err);
+        orderSubmitBtn.disabled = false;
+        orderSubmitText.textContent = 'Conferma Richiesta';
+        orderSubmitSpinner.classList.add('hidden');
+        orderError.textContent = `Errore di trasmissione: ${err.text || err.message || 'Sconosciuto'}. Riprova più tardi.`;
+      }
+    });
   </script>
 </body>
 </html>
