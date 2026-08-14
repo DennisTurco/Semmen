@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Hai vagato troppo lontano · La Setta del Semmen</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .notfound {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 1.5rem;
+      gap: 1.5rem;
+    }
+
+    .notfound__code {
+      font-family: var(--font-mono);
+      font-size: clamp(5rem, 18vw, 10rem);
+      color: var(--gold);
+      line-height: 1;
+      opacity: 0.15;
+      letter-spacing: -0.05em;
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .notfound__seal {
+      width: 100px;
+      height: 100px;
+      opacity: 0.6;
+      animation: sealFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes sealFloat {
+      0%, 100% { transform: translateY(0);   opacity: 0.6; }
+      50%       { transform: translateY(-8px); opacity: 0.9; }
+    }
+
+    .notfound__label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+
+    .notfound__title {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .notfound__subtitle {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 38ch;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .notfound__divider {
+      color: var(--gold-dim);
+      font-size: 0.9rem;
+      letter-spacing: 0.4em;
+    }
+
+    .notfound__actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .notfound__classified {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0.4;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <div class="navbar__logo seal-container"></div>
+        La Setta del Semmen
+      </a>
+      <button class="navbar__burger" id="navbar-burger" aria-label="Apri menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="navbar__menu" id="navbar-menu">
+        <ul class="navbar__nav">
+          <li><a href="index.html">Sanctuarium</a></li>
+          <li><a href="wiki.html">Archivio</a></li>
+          <li><a href="discepoli.html">Discepoli</a></li>
+          <li><a href="candidatura.html">Candidati</a></li>
+          <li><a href="shop.html">Shop</a></li>
+        </ul>
+        <a href="https://paypal.me/DennisTurco" target="_blank" rel="noopener" class="navbar__donate">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .923-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.471z"/></svg>
+          <span>Sostieni la Setta</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="notfound">
+    <span class="notfound__code" aria-hidden="true">404</span>
+
+    <div class="notfound__seal seal-container"></div>
+
+    <span class="notfound__label">Errore di Navigazione — Codice IV·IV·IV</span>
+
+    <h1 class="notfound__title">Hai vagato troppo lontano<br>dal Sanctuarium</h1>
+
+    <p class="notfound__subtitle">
+      La pagina che cerchi non esiste, è stata cancellata dai Grandi Maestri,
+      o non sei ancora degno di accedervi.
+    </p>
+
+    <div class="notfound__divider">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+    <div class="notfound__actions">
+      <a href="index.html" class="btn btn--primary">Torna al Sanctuarium</a>
+      <a href="candidatura.html" class="btn btn--outline">Candidati all'Ordine</a>
+    </div>
+
+    <p class="notfound__classified">
+      DOCUMENTO INESISTENTE &nbsp;·&nbsp; PAGINA CLASSIFICATA &nbsp;·&nbsp; ACCESSO NEGATO
+    </p>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo seal-container"></div>
+        <span class="footer__name">La Setta del Semmen</span>
+      </div>
+      <div class="footer__legal">
+        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        Tutti i meme sono riservati. Riproduzione vietata.
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
