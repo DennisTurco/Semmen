@@ -24,6 +24,34 @@
     });
   });
 
+  /* ── GRADI (caricati una volta, usati da Discepoli e Utenti) ─── */
+  let gradiList = [];
+  let directory = []; // { id, display_name } — utenti collegabili a un discepolo
+
+  async function loadGradi() {
+    const { data, error } = await sb.from('gradi').select('id, nome, simbolo, ordine').order('ordine');
+    if (error) { console.error('[Pannello] gradi error:', error); return; }
+    gradiList = data || [];
+
+    const selEl = document.getElementById('discepolo-grado');
+    selEl.innerHTML = gradiList.map(g => `<option value="${g.id}">${g.simbolo ? g.simbolo + ' ' : ''}${g.nome}</option>`).join('');
+  }
+
+  async function loadDirectory() {
+    const { data, error } = await sb.rpc('directory_utenti');
+    if (error) { console.error('[Pannello] directory_utenti error:', error); return; }
+    directory = data || [];
+
+    const selEl = document.getElementById('discepolo-utente');
+    selEl.innerHTML = `<option value="">— Nessuno (nome libero) —</option>` +
+      directory.map(u => `<option value="${u.id}">${u.display_name}</option>`).join('');
+  }
+
+  function gradoLabel(id) {
+    const g = gradiList.find(x => x.id === id);
+    return g ? `${g.simbolo ? g.simbolo + ' ' : ''}${g.nome}` : '—';
+  }
+
   /* ── EVENTI ─────────────────────────────────────────────────── */
   const eventoForm   = document.getElementById('evento-form');
   const eventoIdEl   = document.getElementById('evento-id');
@@ -42,7 +70,7 @@
     eventiTbody.innerHTML = (eventi || []).map(ev => `
       <tr>
         <td>${ev.titolo}</td>
-        <td>${ev.stato}</td>
+        <td>${calcolaStatoEvento(ev.data)}</td>
         <td>${ev.data_testo || ev.data || '—'}</td>
         <td>${counts[ev.id] || 0}</td>
         <td class="row-actions">
@@ -63,7 +91,6 @@
   function editEvento(ev) {
     eventoIdEl.value = ev.id;
     document.getElementById('evento-titolo').value      = ev.titolo || '';
-    document.getElementById('evento-stato').value        = ev.stato || 'In programma';
     document.getElementById('evento-data').value          = ev.data || '';
     document.getElementById('evento-data-testo').value    = ev.data_testo || '';
     document.getElementById('evento-durata').value        = ev.durata || '';
@@ -97,8 +124,8 @@
 
     const payload = {
       titolo:           document.getElementById('evento-titolo').value.trim(),
-      stato:             document.getElementById('evento-stato').value,
       data:              document.getElementById('evento-data').value || null,
+      stato:             calcolaStatoEvento(document.getElementById('evento-data').value || null),
       data_testo:        document.getElementById('evento-data-testo').value.trim() || null,
       durata:            document.getElementById('evento-durata').value.trim() || null,
       luogo:             document.getElementById('evento-luogo').value.trim() || null,
@@ -119,31 +146,50 @@
   });
 
   /* ── DISCEPOLI ──────────────────────────────────────────────── */
-  const discepoloForm   = document.getElementById('discepolo-form');
-  const discepoloIdEl   = document.getElementById('discepolo-id');
-  const discepoloError  = document.getElementById('discepolo-error');
-  const discepoloCancel = document.getElementById('discepolo-cancel-btn');
-  const discepoliTbody  = document.getElementById('discepoli-tbody');
+  const discepoloForm     = document.getElementById('discepolo-form');
+  const discepoloIdEl     = document.getElementById('discepolo-id');
+  const discepoloError    = document.getElementById('discepolo-error');
+  const discepoloCancel   = document.getElementById('discepolo-cancel-btn');
+  const discepoliTbody    = document.getElementById('discepoli-tbody');
+  const discepoloGradoEl  = document.getElementById('discepolo-grado');
+  const discepoloUtenteEl = document.getElementById('discepolo-utente');
+  const discepoloNomeEl   = document.getElementById('discepolo-nome');
+
+  // Se colleghi un utente, il campo "nome" (fallback) non serve più: lo disabilitiamo.
+  discepoloUtenteEl.addEventListener('change', () => {
+    const collegato = !!discepoloUtenteEl.value;
+    discepoloNomeEl.required = !collegato;
+    discepoloNomeEl.disabled = collegato;
+    if (collegato) discepoloNomeEl.value = '';
+  });
 
   async function loadDiscepoli() {
-    const { data, error } = await sb.from('discepoli').select('*').order('ordine').order('nome');
+    const { data, error } = await sb
+      .from('discepoli')
+      .select('id, nome, nota, grado_id, user_id, gradi(nome, simbolo, ordine), profiles(username, full_name)')
+      .order('nome');
     if (error) { discepoloError.textContent = error.message; return; }
 
-    discepoliTbody.innerHTML = (data || []).map(d => `
+    const rows = (data || []).sort((a, b) => (a.gradi?.ordine ?? 99) - (b.gradi?.ordine ?? 99));
+
+    discepoliTbody.innerHTML = rows.map(d => {
+      const nomeVisualizzato = d.profiles ? (d.profiles.username || d.profiles.full_name) : d.nome;
+      const utenteLabel = d.profiles ? (d.profiles.username || d.profiles.full_name || 'Account collegato') : '—';
+      return `
       <tr>
-        <td>${d.nome}</td>
-        <td>${d.grado}</td>
-        <td>${d.ordine}</td>
+        <td>${nomeVisualizzato}</td>
+        <td>${d.gradi ? (d.gradi.simbolo ? d.gradi.simbolo + ' ' : '') + d.gradi.nome : '—'}</td>
+        <td>${utenteLabel}</td>
         <td>${d.nota || ''}</td>
         <td class="row-actions">
           <button type="button" class="btn btn--outline" data-edit="${d.id}">Modifica</button>
           <button type="button" class="btn btn--ghost" data-delete="${d.id}">Elimina</button>
         </td>
-      </tr>
-    `).join('') || `<tr><td colspan="5">Nessun discepolo registrato. Aggiungine uno dal modulo qui sopra.</td></tr>`;
+      </tr>`;
+    }).join('') || `<tr><td colspan="5">Nessun discepolo registrato. Aggiungine uno dal modulo qui sopra.</td></tr>`;
 
     discepoliTbody.querySelectorAll('[data-edit]').forEach(btn => {
-      btn.addEventListener('click', () => editDiscepolo(data.find(d => d.id === btn.dataset.edit)));
+      btn.addEventListener('click', () => editDiscepolo(rows.find(d => d.id === btn.dataset.edit)));
     });
     discepoliTbody.querySelectorAll('[data-delete]').forEach(btn => {
       btn.addEventListener('click', () => deleteDiscepolo(btn.dataset.delete));
@@ -152,11 +198,11 @@
 
   function editDiscepolo(d) {
     discepoloIdEl.value = d.id;
-    document.getElementById('discepolo-nome').value    = d.nome || '';
-    document.getElementById('discepolo-grado').value   = d.grado || '';
-    document.getElementById('discepolo-simbolo').value = d.simbolo || '';
-    document.getElementById('discepolo-ordine').value  = d.ordine ?? 0;
-    document.getElementById('discepolo-nota').value    = d.nota || '';
+    discepoloNomeEl.value    = d.nome || '';
+    discepoloGradoEl.value   = d.grado_id || '';
+    discepoloUtenteEl.value  = d.user_id || '';
+    document.getElementById('discepolo-nota').value = d.nota || '';
+    discepoloUtenteEl.dispatchEvent(new Event('change'));
     discepoloCancel.classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -164,6 +210,8 @@
   function resetDiscepoloForm() {
     discepoloForm.reset();
     discepoloIdEl.value = '';
+    discepoloNomeEl.disabled = false;
+    discepoloNomeEl.required = true;
     discepoloCancel.classList.add('hidden');
     discepoloError.textContent = '';
   }
@@ -181,13 +229,20 @@
     e.preventDefault();
     discepoloError.textContent = '';
 
+    const userId = discepoloUtenteEl.value || null;
+    const utenteScelto = directory.find(u => u.id === userId);
+
     const payload = {
-      nome:    document.getElementById('discepolo-nome').value.trim(),
-      grado:   document.getElementById('discepolo-grado').value.trim(),
-      simbolo: document.getElementById('discepolo-simbolo').value.trim() || null,
-      ordine:  Number(document.getElementById('discepolo-ordine').value) || 0,
-      nota:    document.getElementById('discepolo-nota').value.trim() || null,
+      grado_id: discepoloGradoEl.value,
+      user_id:  userId,
+      // Se collegato a un account, il nome mostrato verrà comunque letto
+      // dal profilo (vedi loadDiscepoli/discepoli.html): qui salviamo
+      // comunque un fallback sensato nel caso l'account venga scollegato.
+      nome:     userId ? (utenteScelto ? utenteScelto.display_name : 'Membro') : discepoloNomeEl.value.trim(),
+      nota:     document.getElementById('discepolo-nota').value.trim() || null,
     };
+
+    if (!payload.grado_id) { discepoloError.textContent = 'Seleziona un grado.'; return; }
 
     const id = discepoloIdEl.value;
     const { error } = id
@@ -199,6 +254,94 @@
     loadDiscepoli();
   });
 
+  /* ── GRADI ──────────────────────────────────────────────────── */
+  const gradoForm    = document.getElementById('grado-form');
+  const gradoIdEl    = document.getElementById('grado-id');
+  const gradoError   = document.getElementById('grado-error');
+  const gradoCancel  = document.getElementById('grado-cancel-btn');
+  const gradiTbody   = document.getElementById('gradi-tbody');
+
+  async function loadGradiTab() {
+    const { data, error } = await sb.from('gradi').select('*').order('ordine');
+    if (error) { gradoError.textContent = error.message; return; }
+
+    gradiTbody.innerHTML = (data || []).map(g => `
+      <tr>
+        <td>${g.ordine}</td>
+        <td>${g.simbolo ? g.simbolo + ' ' : ''}${g.nome}</td>
+        <td>${(g.descrizione || '').slice(0, 90)}${(g.descrizione || '').length > 90 ? '…' : ''}</td>
+        <td class="row-actions">
+          <button type="button" class="btn btn--outline" data-edit="${g.id}">Modifica</button>
+          <button type="button" class="btn btn--ghost" data-delete="${g.id}">Elimina</button>
+        </td>
+      </tr>
+    `).join('') || `<tr><td colspan="4">Nessun grado configurato.</td></tr>`;
+
+    gradiTbody.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => editGrado(data.find(g => g.id === btn.dataset.edit)));
+    });
+    gradiTbody.querySelectorAll('[data-delete]').forEach(btn => {
+      btn.addEventListener('click', () => deleteGrado(btn.dataset.delete));
+    });
+  }
+
+  function editGrado(g) {
+    gradoIdEl.value = g.id;
+    document.getElementById('grado-nome').value        = g.nome || '';
+    document.getElementById('grado-simbolo').value      = g.simbolo || '';
+    document.getElementById('grado-ordine').value       = g.ordine ?? 0;
+    document.getElementById('grado-descrizione').value  = g.descrizione || '';
+    document.getElementById('grado-privilegi').value    = g.privilegi || '';
+    gradoCancel.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetGradoForm() {
+    gradoForm.reset();
+    gradoIdEl.value = '';
+    gradoCancel.classList.add('hidden');
+    gradoError.textContent = '';
+  }
+
+  gradoCancel.addEventListener('click', resetGradoForm);
+
+  async function deleteGrado(id) {
+    if (!confirm('Eliminare questo grado? Fallisce se è ancora usato da discepoli o utenti.')) return;
+    const { error } = await sb.from('gradi').delete().eq('id', id);
+    if (error) { alert(error.message); return; }
+    await refreshGradiOvunque();
+  }
+
+  gradoForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    gradoError.textContent = '';
+
+    const payload = {
+      nome:        document.getElementById('grado-nome').value.trim(),
+      simbolo:     document.getElementById('grado-simbolo').value.trim() || null,
+      ordine:      Number(document.getElementById('grado-ordine').value) || 0,
+      descrizione: document.getElementById('grado-descrizione').value.trim() || null,
+      privilegi:   document.getElementById('grado-privilegi').value.trim() || null,
+    };
+
+    const id = gradoIdEl.value;
+    const { error } = id
+      ? await sb.from('gradi').update(payload).eq('id', id)
+      : await sb.from('gradi').insert(payload);
+
+    if (error) { gradoError.textContent = error.message; return; }
+    resetGradoForm();
+    await refreshGradiOvunque();
+  });
+
+  // Dopo aver aggiunto/modificato/eliminato un grado, aggiorna anche le
+  // select che lo usano altrove nel Pannello (Discepoli, Utenti).
+  async function refreshGradiOvunque() {
+    await loadGradi();
+    await loadGradiTab();
+    if (isAdmin) loadUtenti();
+  }
+
   /* ── UTENTI (solo Admin) ────────────────────────────────────── */
   const utentiTbody = document.getElementById('utenti-tbody');
   const ROLES = ['admin', 'editor', 'compagno', 'utente'];
@@ -206,36 +349,59 @@
   async function loadUtenti() {
     if (!isAdmin) return;
     const { data, error } = await sb.from('admin_users').select('*').order('created_at', { ascending: false });
-    if (error) { utentiTbody.innerHTML = `<tr><td colspan="5">${error.message}</td></tr>`; return; }
+    if (error) { utentiTbody.innerHTML = `<tr><td colspan="7">${error.message}</td></tr>`; return; }
 
     utentiTbody.innerHTML = (data || []).map(u => `
       <tr>
         <td>${u.full_name || '—'}</td>
+        <td>${u.username || '—'}</td>
         <td>${u.email}</td>
         <td>
           <select class="form-select" data-role-for="${u.id}" ${u.id === profile.id ? 'disabled title="Non puoi modificare il tuo stesso ruolo"' : ''}>
             ${ROLES.map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${SemmenAuth.ROLE_LABELS[r]}</option>`).join('')}
           </select>
         </td>
+        <td>
+          <select class="form-select" data-grado-for="${u.id}">
+            <option value="">— Nessuno —</option>
+            ${gradiList.map(g => `<option value="${g.id}" ${g.id === u.grado_id ? 'selected' : ''}>${g.simbolo ? g.simbolo + ' ' : ''}${g.nome}</option>`).join('')}
+          </select>
+        </td>
         <td>${new Date(u.created_at).toLocaleDateString('it-IT')}</td>
-        <td><span class="hidden" id="role-saved-${u.id}" style="color:var(--gold);font-size:0.75rem;">✓ salvato</span></td>
+        <td><span class="hidden" id="saved-${u.id}" style="color:var(--gold);font-size:0.75rem;">✓ salvato</span></td>
       </tr>
-    `).join('') || `<tr><td colspan="5">Nessun utente registrato.</td></tr>`;
+    `).join('') || `<tr><td colspan="7">Nessun utente registrato.</td></tr>`;
+
+    function flashSaved(userId) {
+      const badge = document.getElementById(`saved-${userId}`);
+      badge.classList.remove('hidden');
+      setTimeout(() => badge.classList.add('hidden'), 2000);
+    }
 
     utentiTbody.querySelectorAll('[data-role-for]').forEach(select => {
       select.addEventListener('change', async () => {
         const userId = select.dataset.roleFor;
         const { error } = await sb.rpc('admin_set_role', { target_user_id: userId, new_role: select.value });
         if (error) { alert(error.message); return; }
-        const badge = document.getElementById(`role-saved-${userId}`);
-        badge.classList.remove('hidden');
-        setTimeout(() => badge.classList.add('hidden'), 2000);
+        flashSaved(userId);
+      });
+    });
+
+    utentiTbody.querySelectorAll('[data-grado-for]').forEach(select => {
+      select.addEventListener('change', async () => {
+        const userId = select.dataset.gradoFor;
+        const { error } = await sb.rpc('admin_set_grado', { target_user_id: userId, new_grado_id: select.value || null });
+        if (error) { alert(error.message); return; }
+        flashSaved(userId);
       });
     });
   }
 
   /* ── Init ───────────────────────────────────────────────────── */
+  await loadGradi();
+  await loadDirectory();
   loadEventi();
   loadDiscepoli();
+  loadGradiTab();
   loadUtenti();
 })();

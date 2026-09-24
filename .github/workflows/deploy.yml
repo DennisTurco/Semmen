@@ -33,7 +33,6 @@ jobs:
       # Settings → Secrets and variables → Actions
       - name: Build config.js from secrets
         env:
-          WIKI_PASSWORD:       ${{ secrets.WIKI_PASSWORD }}
           SUPABASE_URL:        ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY:   ${{ secrets.SUPABASE_ANON_KEY }}
           EMAILJS_PUBLIC_KEY:  ${{ secrets.EMAILJS_PUBLIC_KEY }}

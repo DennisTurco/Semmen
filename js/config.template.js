@@ -19,13 +19,6 @@ const CONFIG = {
     anonKey: "__SUPABASE_ANON_KEY__",
   },
 
-  /* ── WIKI ──────────────────────────────────────────────────── */
-  wiki: {
-    password: "__WIKI_PASSWORD__",
-    accessTitle: "Archivio Riservato",
-    accessSubtitle: "Inserisci il Codice di Accesso",
-  },
-
   /* ── EMAIL (EmailJS) ───────────────────────────────────────── */
   email: {
     publicKey:  "__EMAILJS_PUBLIC_KEY__",
@@ -178,5 +171,4 @@ const CONFIG = {
 Object.freeze(CONFIG);
 Object.freeze(CONFIG.site);
 Object.freeze(CONFIG.supabase);
-Object.freeze(CONFIG.wiki);
 Object.freeze(CONFIG.email);

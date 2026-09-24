@@ -105,10 +105,19 @@
     }
 
     // Se già loggato, vai dritto all'account
+    // Se già loggato E il profilo si carica correttamente, salta al redirect
+    // (o account.html). Se la sessione c'è ma il profilo no, si resta sul
+    // login invece di rimbalzare: evita un loop infinito con account.html
+    // quando lo schema "semmen" non è ancora esposto o il profilo manca.
     (async () => {
-      if (SemmenAuth.configured && await SemmenAuth.getSession()) {
-        location.href = 'account.html';
-      }
+      if (!SemmenAuth.configured) return;
+      const session = await SemmenAuth.getSession();
+      if (!session) return;
+      const profile = await SemmenAuth.getProfile();
+      if (!profile) return;
+
+      const params = new URLSearchParams(location.search);
+      location.href = params.get('redirect') || 'account.html';
     })();
 
     form.addEventListener('submit', async e => {

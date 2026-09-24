@@ -79,6 +79,26 @@ document.querySelectorAll('.seal-container').forEach(el => {
   if (svg) svg.style.color = 'var(--gold)';
 });
 
+/* ── Stato automatico eventi ────────────────────────────────── */
+// "Imminente" entro 7 giorni dalla data, "Passato" se già trascorsa,
+// altrimenti "In programma". Usata da eventi.js e pannello.js così lo
+// stato non richiede mai un aggiornamento manuale.
+const SOGLIA_IMMINENTE_GIORNI = 7;
+
+function calcolaStatoEvento(dataStr) {
+  if (!dataStr) return 'In programma';
+  const oggi = new Date();
+  oggi.setHours(0, 0, 0, 0);
+  const data = new Date(dataStr);
+  if (isNaN(data)) return 'In programma';
+  data.setHours(0, 0, 0, 0);
+
+  const diffGiorni = Math.round((data - oggi) / 86400000);
+  if (diffGiorni < 0) return 'Passato';
+  if (diffGiorni <= SOGLIA_IMMINENTE_GIORNI) return 'Imminente';
+  return 'In programma';
+}
+
 /* ── Animazioni on-scroll ───────────────────────────────────── */
 if ('IntersectionObserver' in window) {
   const observer = new IntersectionObserver(

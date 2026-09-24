@@ -75,9 +75,27 @@ const SemmenAuth = (function () {
       renderAccessMessage('Supabase non è ancora configurato per questo sito.');
       return null;
     }
+
+    // Prima si controlla la sessione: solo l'assenza di sessione giustifica
+    // un redirect al login. Se la sessione c'è ma il profilo non si carica
+    // (es. schema "semmen" non ancora esposto nell'API, o riga mancante),
+    // NON si rimanda al login — altrimenti login.html rimanda indietro
+    // qui appena vede una sessione valida, creando un loop infinito.
+    const session = await getSession();
+    if (!session) {
+      location.href = `login.html?redirect=${encodeURIComponent(location.pathname.split('/').pop())}`;
+      return null;
+    }
+
     const profile = await getProfile();
     if (!profile) {
-      location.href = `login.html?redirect=${encodeURIComponent(location.pathname.split('/').pop())}`;
+      renderAccessMessage(
+        'Sei autenticato, ma non è stato possibile caricare il tuo profilo. ' +
+        'Controlla che lo schema "semmen" sia tra gli Exposed schemas di Supabase ' +
+        '(Project Settings → Data API) e che esista una riga per il tuo utente ' +
+        'nella tabella semmen.profiles, poi ricarica la pagina.',
+        true
+      );
       return null;
     }
     if (roles && roles.length && !roles.includes(profile.role)) {
@@ -87,7 +105,7 @@ const SemmenAuth = (function () {
     return profile;
   }
 
-  function renderAccessMessage(msg) {
+  function renderAccessMessage(msg, showLogout) {
     const main = document.getElementById('page-main') || document.querySelector('.container');
     if (!main) { alert(msg); return; }
     main.innerHTML = `
@@ -96,9 +114,14 @@ const SemmenAuth = (function () {
         <h1 class="page-header__title">Non Autorizzato</h1>
         <p class="page-header__subtitle">${msg}</p>
       </div>
-      <div style="text-align:center;margin-top:2rem;">
+      <div style="text-align:center;margin-top:2rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
         <a href="index.html" class="btn btn--outline">Torna al Sanctuarium</a>
+        ${showLogout ? `<button type="button" class="btn btn--ghost" id="access-logout-btn">Esci e riprova</button>` : ''}
       </div>`;
+    if (showLogout) {
+      const btn = document.getElementById('access-logout-btn');
+      if (btn) btn.addEventListener('click', signOut);
+    }
   }
 
   /* ── Navbar dinamica (Accedi / Account / Pannello / Esci) ───── */
@@ -122,12 +145,38 @@ const SemmenAuth = (function () {
       return;
     }
 
+    // Un solo elemento in navbar (menu a tendina) invece di tre voci
+    // separate, per non affollare la barra.
     const canPannello = profile.role === 'admin' || profile.role === 'editor';
     slot.innerHTML = `
-      ${canPannello ? `<a href="pannello.html" class="navbar__auth-link">Pannello</a>` : ''}
-      <a href="account.html" class="navbar__auth-link" title="${ROLE_LABELS[profile.role] || profile.role}">Account</a>
-      <button type="button" class="navbar__auth-link navbar__auth-logout" id="navbar-logout">Esci</button>
+      <div class="navbar__account" id="navbar-account">
+        <button type="button" class="navbar__auth-link navbar__account-trigger" id="navbar-account-trigger" aria-expanded="false">
+          ${ROLE_LABELS[profile.role] || profile.role}
+          <span class="navbar__account-caret">▾</span>
+        </button>
+        <div class="navbar__account-menu">
+          ${canPannello ? `<a href="pannello.html">Pannello</a>` : ''}
+          <a href="account.html">Account</a>
+          <button type="button" id="navbar-logout">Esci</button>
+        </div>
+      </div>
     `;
+
+    const wrapper = document.getElementById('navbar-account');
+    const trigger = document.getElementById('navbar-account-trigger');
+
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = wrapper.classList.toggle('is-open');
+      trigger.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.addEventListener('click', e => {
+      if (!wrapper.contains(e.target)) {
+        wrapper.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
 
     const logoutBtn = document.getElementById('navbar-logout');
     if (logoutBtn) logoutBtn.addEventListener('click', signOut);

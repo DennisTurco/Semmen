@@ -119,6 +119,7 @@
     <div class="tabs" id="tabs">
       <button class="tab-btn active" data-tab="eventi" type="button">Eventi</button>
       <button class="tab-btn" data-tab="discepoli" type="button">Discepoli</button>
+      <button class="tab-btn" data-tab="gradi" type="button">Gradi</button>
       <button class="tab-btn hidden" data-tab="utenti" id="tab-btn-utenti" type="button">Utenti</button>
     </div>
 
@@ -134,16 +135,9 @@
               <input type="text" id="evento-titolo" class="form-input" required>
             </div>
             <div class="form-group">
-              <label class="form-label" for="evento-stato">Stato</label>
-              <select id="evento-stato" class="form-select">
-                <option>In programma</option>
-                <option>Imminente</option>
-                <option>Passato</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="evento-data">Data (per ordinamento)</label>
+              <label class="form-label" for="evento-data">Data (determina anche lo Stato)</label>
               <input type="date" id="evento-data" class="form-input">
+              <p class="form-hint">Lo stato (In programma / Imminente / Passato) si calcola da solo in base a questa data.</p>
             </div>
             <div class="form-group">
               <label class="form-label" for="evento-data-testo">Data mostrata (testo libero)</label>
@@ -194,20 +188,19 @@
           <input type="hidden" id="discepolo-id" value="">
           <div class="entry-form__grid">
             <div class="form-group">
+              <label class="form-label" for="discepolo-grado">Grado <span class="required">*</span></label>
+              <select id="discepolo-grado" class="form-select" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="discepolo-utente">Utente collegato (facoltativo)</label>
+              <select id="discepolo-utente" class="form-select">
+                <option value="">— Nessuno (nome libero) —</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
               <label class="form-label" for="discepolo-nome">Nome <span class="required">*</span></label>
               <input type="text" id="discepolo-nome" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="discepolo-grado">Grado <span class="required">*</span></label>
-              <input type="text" id="discepolo-grado" class="form-input" placeholder="es. Adepto del Semmen" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="discepolo-simbolo">Simbolo</label>
-              <input type="text" id="discepolo-simbolo" class="form-input" placeholder="es. ✦✦✦">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="discepolo-ordine">Ordine grado (0 = più alto)</label>
-              <input type="number" id="discepolo-ordine" class="form-input" value="0">
+              <p class="form-hint">Usato solo se non colleghi un utente: se colleghi un account, il nome mostrato sarà il suo username.</p>
             </div>
             <div class="form-group" style="grid-column:1/-1;">
               <label class="form-label" for="discepolo-nota">Nota (facoltativa)</label>
@@ -224,9 +217,57 @@
 
       <table class="admin-table" id="discepoli-table">
         <thead>
-          <tr><th>Nome</th><th>Grado</th><th>Ordine</th><th>Nota</th><th>Azioni</th></tr>
+          <tr><th>Nome</th><th>Grado</th><th>Utente collegato</th><th>Nota</th><th>Azioni</th></tr>
         </thead>
         <tbody id="discepoli-tbody"></tbody>
+      </table>
+    </section>
+
+    <!-- ── GRADI ──────────────────────────────────────────────── -->
+    <section class="tab-panel" id="tab-gradi">
+      <div class="entry-form">
+        <h3 style="margin-bottom:1rem;">Nuovo Grado</h3>
+        <p style="color:var(--text-muted);font-size:0.82rem;margin:-0.5rem 0 1rem;">
+          I gradi popolano sia la pagina wiki "Gerarchia Interna" sia il raggruppamento
+          dei Discepoli. L'ordine determina la posizione nella gerarchia (0 = più alto).
+        </p>
+        <form id="grado-form">
+          <input type="hidden" id="grado-id" value="">
+          <div class="entry-form__grid">
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="grado-nome">Nome <span class="required">*</span></label>
+              <input type="text" id="grado-nome" class="form-input" placeholder="es. Adepto del Semmen" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="grado-simbolo">Simbolo</label>
+              <input type="text" id="grado-simbolo" class="form-input" placeholder="es. ✦✦✦">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="grado-ordine">Ordine (0 = più alto)</label>
+              <input type="number" id="grado-ordine" class="form-input" value="0">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="grado-descrizione">Descrizione</label>
+              <textarea id="grado-descrizione" class="form-textarea" rows="3" placeholder="Mostrata nella pagina wiki Gerarchia Interna"></textarea>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="grado-privilegi">Privilegi (facoltativo)</label>
+              <textarea id="grado-privilegi" class="form-textarea" rows="2"></textarea>
+            </div>
+          </div>
+          <p class="pw-box__error" id="grado-error"></p>
+          <div style="display:flex;gap:0.75rem;">
+            <button type="submit" class="btn btn--primary" id="grado-submit-btn">Salva Grado</button>
+            <button type="button" class="btn btn--ghost hidden" id="grado-cancel-btn">Annulla Modifica</button>
+          </div>
+        </form>
+      </div>
+
+      <table class="admin-table" id="gradi-table">
+        <thead>
+          <tr><th>Ordine</th><th>Grado</th><th>Descrizione</th><th>Azioni</th></tr>
+        </thead>
+        <tbody id="gradi-tbody"></tbody>
       </table>
     </section>
 
@@ -234,7 +275,7 @@
     <section class="tab-panel" id="tab-utenti">
       <table class="admin-table" id="utenti-table">
         <thead>
-          <tr><th>Nome</th><th>Email</th><th>Ruolo</th><th>Registrato il</th><th></th></tr>
+          <tr><th>Nome</th><th>Username</th><th>Email</th><th>Ruolo</th><th>Grado</th><th>Registrato il</th><th></th></tr>
         </thead>
         <tbody id="utenti-tbody"></tbody>
       </table>

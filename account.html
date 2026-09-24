@@ -48,8 +48,13 @@
           <p id="account-email" style="font-family:var(--font-mono);">—</p>
         </div>
         <div class="form-group">
-          <label class="form-label">Grado nel Sistema</label>
+          <label class="form-label">Ruolo (permessi)</label>
           <p id="account-role" style="font-family:var(--font-mono);color:var(--gold);">—</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Grado nella Setta</label>
+          <p id="account-grado" style="font-family:var(--font-mono);color:var(--gold);">—</p>
+          <p class="form-hint">Assegnato dai Grandi Maestri (Admin), non modificabile da qui.</p>
         </div>
 
         <form id="profile-form">
@@ -57,10 +62,23 @@
             <label class="form-label" for="account-nome">Nome e Cognome</label>
             <input type="text" id="account-nome" name="full_name" class="form-input" placeholder="Il tuo nome">
           </div>
+          <div class="form-group">
+            <label class="form-label" for="account-username">Username</label>
+            <input type="text" id="account-username" name="username" class="form-input" placeholder="es. druido_prosciutto" pattern="[a-zA-Z0-9_.]{3,24}">
+          </div>
           <p class="pw-box__error" id="profile-error"></p>
           <p style="color:var(--gold);font-size:0.85rem;font-family:var(--font-mono);" id="profile-success"></p>
-          <button type="submit" class="btn btn--outline" style="width:100%;">Salva Nome</button>
+          <button type="submit" class="btn btn--outline" style="width:100%;">Salva</button>
         </form>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="card__body">
+        <h3 style="font-size:1.1rem;margin-bottom:1rem;">Le Tue Partecipazioni agli Eventi</h3>
+        <div id="partecipazioni-list">
+          <p style="color:var(--text-muted);font-size:0.85rem;">Caricamento...</p>
+        </div>
       </div>
     </div>
 
@@ -110,6 +128,14 @@
       document.getElementById('account-email').textContent = profile.email;
       document.getElementById('account-role').textContent  = SemmenAuth.ROLE_LABELS[profile.role] || profile.role;
       document.getElementById('account-nome').value = profile.full_name || '';
+      document.getElementById('account-username').value = profile.username || '';
+
+      if (profile.grado_id) {
+        const { data: grado } = await SemmenAuth.db().from('gradi').select('nome, simbolo').eq('id', profile.grado_id).single();
+        if (grado) document.getElementById('account-grado').textContent = `${grado.simbolo || ''} ${grado.nome}`.trim();
+      } else {
+        document.getElementById('account-grado').textContent = 'Nessuno';
+      }
 
       document.getElementById('profile-form').addEventListener('submit', async e => {
         e.preventDefault();
@@ -119,13 +145,14 @@
         successEl.textContent = '';
 
         const full_name = document.getElementById('account-nome').value.trim();
+        const username  = document.getElementById('account-username').value.trim() || null;
         const { error } = await SemmenAuth.db()
           .from('profiles')
-          .update({ full_name })
+          .update({ full_name, username })
           .eq('id', profile.id);
 
         if (error) { errorEl.textContent = error.message; return; }
-        successEl.textContent = '✓ Nome aggiornato.';
+        successEl.textContent = '✓ Profilo aggiornato.';
       });
 
       document.getElementById('password-form').addEventListener('submit', async e => {
@@ -144,6 +171,52 @@
       });
 
       document.getElementById('logout-btn').addEventListener('click', SemmenAuth.signOut);
+
+      /* ── Le tue partecipazioni agli eventi ─────────────────── */
+      const listEl = document.getElementById('partecipazioni-list');
+
+      async function loadPartecipazioni() {
+        const { data, error } = await SemmenAuth.db()
+          .from('event_partecipazioni')
+          .select('id, note, created_at, eventi(titolo, data, data_testo)')
+          .eq('user_id', profile.id)
+          .order('created_at', { ascending: false });
+
+        if (error) { listEl.innerHTML = `<p class="pw-box__error">${error.message}</p>`; return; }
+
+        if (!data || data.length === 0) {
+          listEl.innerHTML = `<p style="color:var(--text-muted);font-size:0.85rem;">
+            Nessuna candidatura ad eventi. Sfoglia gli <a href="eventi.html">Eventi</a> della Setta.
+          </p>`;
+          return;
+        }
+
+        listEl.innerHTML = data.map(p => {
+          const ev = p.eventi;
+          const stato = ev ? calcolaStatoEvento(ev.data) : '—';
+          return `
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--border);">
+              <div>
+                <p style="font-family:var(--font-ui);color:var(--text-primary);">${ev ? ev.titolo : 'Evento eliminato'}</p>
+                <p style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">
+                  ${ev ? (ev.data_testo || ev.data || '') : ''} · ${stato}
+                </p>
+              </div>
+              <button type="button" class="btn btn--ghost" style="font-size:0.7rem;padding:0.4rem 0.7rem;" data-ritira="${p.id}">Ritira</button>
+            </div>`;
+        }).join('');
+
+        listEl.querySelectorAll('[data-ritira]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!confirm('Ritirare questa candidatura?')) return;
+            const { error } = await SemmenAuth.db().from('event_partecipazioni').delete().eq('id', btn.dataset.ritira);
+            if (error) { alert(error.message); return; }
+            loadPartecipazioni();
+          });
+        });
+      }
+
+      loadPartecipazioni();
     })();
   </script>
 </body>

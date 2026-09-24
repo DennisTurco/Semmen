@@ -193,6 +193,14 @@ function showSuccess(data) {
   form.parentElement.classList.add('hidden');
   successScreen.classList.add('visible');
 
+  // Segna l'utente come "Candidato" (grado narrativo), visibile
+  // dall'Admin nel Pannello → Utenti. Non blocca la UI se fallisce.
+  if (typeof SemmenAuth !== 'undefined' && SemmenAuth.configured) {
+    SemmenAuth.db().rpc('candidarsi').then(({ error }) => {
+      if (error) console.error('[Candidatura] candidarsi() error:', error);
+    });
+  }
+
   // Re-inject seal
   document.querySelectorAll('.seal-container').forEach(el => {
     if (typeof SEAL_SVG !== 'undefined') {

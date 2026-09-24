@@ -5,17 +5,11 @@
 
 /* ── Elementi DOM ───────────────────────────────────────────── */
 const overlay     = document.getElementById('pw-overlay');
-const pwInput     = document.getElementById('pw-input');
-const pwBtn       = document.getElementById('pw-submit');
-const pwError     = document.getElementById('pw-error');
 const sidebarNav  = document.getElementById('wiki-nav');
 const wikiMain    = document.getElementById('wiki-main');
 const wikiTitle   = document.getElementById('wiki-page-title');
 const wikiMeta    = document.getElementById('wiki-page-meta');
 const wikiBody    = document.getElementById('wiki-body');
-
-const SESSION_KEY = 'semmen_wiki_auth';
-let pendingPage   = null;
 
 /* ── Manifest ───────────────────────────────────────────────── */
 const WIKI_MANIFEST = {
@@ -421,16 +415,13 @@ La wiki supporta il Markdown standard (GFM): titoli, grassetto, corsivo, tabelle
 };
 
 /* ── Auth ───────────────────────────────────────────────────── */
-function isAuthenticated() {
-  return sessionStorage.getItem(SESSION_KEY) === 'ok';
-}
-
-function authenticate(password) {
-  if (password === CONFIG.wiki.password) {
-    sessionStorage.setItem(SESSION_KEY, 'ok');
-    return true;
-  }
-  return false;
+// Una pagina "protetta" richiede login + grado ≥ Compagno (ruoli
+// compagno/editor/admin). "utente" (account base senza rito) e i
+// visitatori non loggati non hanno accesso.
+async function isAllowed() {
+  if (!SemmenAuth.configured) return false;
+  const profile = await SemmenAuth.getProfile();
+  return !!profile && profile.role !== 'utente';
 }
 
 /* ── Inizializzazione ───────────────────────────────────────── */
@@ -439,39 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
   manifest = WIKI_MANIFEST;
   renderSidebar();
   handleRoute();
-
-  pwInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') handleLogin();
-  });
-  pwBtn.addEventListener('click', handleLogin);
 });
-
-function handleLogin() {
-  const val = pwInput.value.trim();
-  if (!val) {
-    showError('Il Codice non può essere vuoto.');
-    return;
-  }
-  if (authenticate(val)) {
-    overlay.classList.add('hidden');
-    pwInput.value = '';
-    if (pendingPage) {
-      loadPage(pendingPage);
-      pendingPage = null;
-    }
-  } else {
-    showError('Codice errato. Accesso negato.');
-    pwInput.value = '';
-    pwInput.focus();
-    pwInput.classList.add('shake');
-    setTimeout(() => pwInput.classList.remove('shake'), 500);
-  }
-}
-
-function showError(msg) {
-  pwError.textContent = msg;
-  setTimeout(() => { pwError.textContent = ''; }, 3000);
-}
 
 /* ── Manifest ───────────────────────────────────────────────── */
 let manifest = null;
@@ -509,26 +468,34 @@ function renderSidebar() {
 }
 
 /* ── Routing ────────────────────────────────────────────────── */
-function handleRoute() {
+async function handleRoute() {
   const hash = location.hash.replace('#', '') || 'index';
 
-  if (isProtectedPage(hash) && !isAuthenticated()) {
-    pendingPage = hash;
+  if (isProtectedPage(hash) && !(await isAllowed())) {
     overlay.classList.remove('hidden');
-    setTimeout(() => pwInput.focus(), 50);
     return;
   }
 
+  overlay.classList.add('hidden');
   loadPage(hash);
 }
 
 window.addEventListener('hashchange', handleRoute);
 
 /* ── Carica pagina ──────────────────────────────────────────── */
-function loadPage(pageId) {
+async function loadPage(pageId) {
   document.querySelectorAll('.wiki-sidebar__item').forEach(a => {
     a.classList.toggle('active', a.dataset.page === pageId);
   });
+
+  // La pagina "gerarchia" viene costruita dinamicamente dalla tabella
+  // Supabase `gradi` (fonte unica condivisa con la pagina Discepoli).
+  // Se Supabase non è disponibile, si usa il testo statico di fallback.
+  if (pageId === 'gerarchia') {
+    const dynamic = await buildGerarchiaMarkdown();
+    renderPage(pageId, dynamic || WIKI_PAGES[pageId]);
+    return;
+  }
 
   const raw = WIKI_PAGES[pageId];
 
@@ -543,6 +510,44 @@ function loadPage(pageId) {
   }
 
   renderPage(pageId, raw);
+}
+
+/* ── Gerarchia dinamica (da Supabase, tabella `gradi`) ───────── */
+async function buildGerarchiaMarkdown() {
+  if (!SemmenAuth.configured) return null;
+
+  const { data, error } = await SemmenAuth.db()
+    .from('gradi')
+    .select('*')
+    .order('ordine');
+
+  if (error || !data || data.length === 0) return null;
+
+  const sezioni = data.map(g => {
+    const righe = [`### ${g.simbolo ? g.simbolo + ' ' : ''}${g.nome}`];
+    if (g.descrizione) righe.push('', g.descrizione);
+    if (g.privilegi)   righe.push('', `**Privilegi:** ${g.privilegi}`);
+    return righe.join('\n');
+  });
+
+  return [
+    '---',
+    'title: Gerarchia Interna',
+    'category: La Setta',
+    'classification: PUBBLICO',
+    'author: Consiglio dei Grandi Maestri',
+    '---',
+    '',
+    '# Gerarchia Interna della Setta',
+    '',
+    'La Setta del Semmen è governata da una struttura gerarchica rigorosa.',
+    '',
+    '---',
+    '',
+    '## I Gradi dell\'Ordine',
+    '',
+    sezioni.join('\n\n---\n\n'),
+  ].join('\n');
 }
 
 /* ── Rendering markdown ─────────────────────────────────────── */

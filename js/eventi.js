@@ -47,12 +47,12 @@ async function loadEventi() {
         descrizione: ev.descrizione,
         immagine: ev.immagine,
         creditoImmagine: ev.credito_immagine,
-        stato: ev.stato,
+        stato: calcolaStatoEvento(ev.data),
       }));
     }
   }
   eventiFromDb = false;
-  return (CONFIG.eventi || []).map((ev, i) => ({ id: `local-${i}`, ...ev }));
+  return (CONFIG.eventi || []).map((ev, i) => ({ id: `local-${i}`, ...ev, stato: calcolaStatoEvento(ev.data) }));
 }
 
 async function loadMiePartecipazioni() {
