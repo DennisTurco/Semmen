@@ -135,3 +135,68 @@ function calcolaStatoEvento(dataStr) {
     }));
   }).observe(document.body, { childList: true, subtree: true });
 })();
+
+/* ── Atmosfera: barra di lettura, navbar allo scroll, torcia, card ── */
+(function initAtmosphere() {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer  = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  const progress = document.createElement('div');
+  progress.className = 'scroll-progress';
+  document.body.appendChild(progress);
+
+  const navbar = document.querySelector('.navbar');
+  let scrollTicking = false;
+
+  function onScroll() {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+    if (navbar) navbar.classList.toggle('is-scrolled', window.scrollY > 12);
+    scrollTicking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) { scrollTicking = true; requestAnimationFrame(onScroll); }
+  }, { passive: true });
+  onScroll();
+
+  if (!finePointer || reduceMotion) return;
+
+  const torch = document.createElement('div');
+  torch.className = 'torch';
+  document.body.appendChild(torch);
+
+  let px = 0, py = 0, tx = 0, ty = 0, torchRunning = false;
+
+  function moveTorch() {
+    tx += (px - tx) * 0.15;
+    ty += (py - ty) * 0.15;
+    torch.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+    if (Math.abs(px - tx) > 0.5 || Math.abs(py - ty) > 0.5) requestAnimationFrame(moveTorch);
+    else torchRunning = false;
+  }
+
+  document.addEventListener('pointermove', e => {
+    px = e.clientX;
+    py = e.clientY;
+    torch.classList.add('is-on');
+    if (!torchRunning) { torchRunning = true; requestAnimationFrame(moveTorch); }
+
+    const card = e.target.closest && e.target.closest('.feature-card');
+    if (!card) return;
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    card.style.setProperty('--mx', `${x * 100}%`);
+    card.style.setProperty('--my', `${y * 100}%`);
+    card.style.transform =
+      `perspective(900px) rotateX(${(0.5 - y) * 6}deg) rotateY(${(x - 0.5) * 8}deg) translateY(-4px)`;
+  }, { passive: true });
+
+  document.addEventListener('pointerout', e => {
+    const card = e.target.closest && e.target.closest('.feature-card');
+    if (card && !card.contains(e.relatedTarget)) card.style.transform = '';
+  });
+
+  document.documentElement.addEventListener('pointerleave', () => torch.classList.remove('is-on'));
+})();

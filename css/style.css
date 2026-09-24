@@ -1672,23 +1672,28 @@ a.feature-card:hover::after {
 
 /* Scroll-reveal: applicato via data-reveal + osservato da js/main.js,
    che aggiunge .is-visible al primo ingresso in viewport. */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity var(--transition-slow), transform var(--transition-slow);
-}
+/* Usa `animation` + la proprietà `translate` (non `transition`/`transform`)
+   così non sovrascrive le transizioni hover né i transform delle card. */
+[data-reveal] { opacity: 0; }
 
 [data-reveal].is-visible {
   opacity: 1;
-  transform: translateY(0);
+  animation: revealUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes revealUp {
+  from { opacity: 0; translate: 0 28px; filter: blur(4px); }
+  to   { opacity: 1; translate: 0 0;    filter: blur(0); }
+}
+
+.feature-grid > [data-reveal]:nth-child(2) { animation-delay: 0.08s; }
+.feature-grid > [data-reveal]:nth-child(3) { animation-delay: 0.16s; }
+.feature-grid > [data-reveal]:nth-child(4) { animation-delay: 0.24s; }
+.feature-grid > [data-reveal]:nth-child(5) { animation-delay: 0.32s; }
+.feature-grid > [data-reveal]:nth-child(6) { animation-delay: 0.40s; }
+
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
+  [data-reveal], [data-reveal].is-visible { opacity: 1; animation: none; }
 }
 
 /* ============================================================
@@ -1849,4 +1854,535 @@ a.feature-card:hover::after {
 .hero > *:not(#particles-canvas) {
   position: relative;
   z-index: 1;
+}
+
+/* ============================================================
+   ATMOSFERA — strato estetico "sacro" (luce, profondità, oro)
+   ============================================================ */
+@property --spot {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --halo-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+::selection { background: rgba(201, 168, 76, 0.35); color: #fff8e6; }
+
+html { scrollbar-color: var(--gold-dim) var(--bg-root); scrollbar-width: thin; }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-root); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--gold-dim), #4a3a18);
+  border-radius: 10px;
+  border: 2px solid var(--bg-root);
+}
+
+/* Luce ambientale fissa: bagliore dorato in alto, braci cremisi in basso,
+   bordi in vignettatura. Sta sotto a tutto il contenuto. */
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 168, 76, 0.09), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 110%, rgba(122, 26, 26, 0.12), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgba(122, 26, 26, 0.07), transparent 60%),
+    var(--bg-root);
+  background-attachment: fixed;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* Barra di avanzamento lettura (creata da js/main.js) */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold-bright), var(--crimson-bright));
+  box-shadow: 0 0 12px rgba(232, 197, 106, 0.6);
+  z-index: 10001;
+  pointer-events: none;
+}
+
+/* Torcia: alone morbido che segue il cursore (solo mouse, creato da main.js) */
+.torch {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 560px;
+  height: 560px;
+  margin: -280px 0 0 -280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 197, 106, 0.07) 0%, rgba(201, 168, 76, 0.03) 35%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  will-change: transform;
+}
+.torch.is-on { opacity: 1; }
+
+/* ── Navbar in vetro fumé con filo d'oro ─────────────────────── */
+.navbar {
+  background: rgba(8, 8, 8, 0.72);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, var(--gold-dim) 20%, var(--gold) 50%, var(--gold-dim) 80%, transparent) 1;
+  transition: background var(--transition), box-shadow var(--transition);
+}
+.navbar.is-scrolled {
+  background: rgba(6, 6, 6, 0.9);
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.9);
+}
+
+.navbar__brand { transition: color var(--transition), text-shadow var(--transition); }
+.navbar__brand:hover { text-shadow: 0 0 18px rgba(201, 168, 76, 0.55); }
+.navbar__logo { transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter var(--transition); }
+.navbar__brand:hover .navbar__logo {
+  transform: rotate(-25deg) scale(1.06);
+  filter: drop-shadow(0 0 8px rgba(201, 168, 76, 0.6));
+}
+
+@media (min-width: 801px) {
+  .navbar__nav a {
+    position: relative;
+    border-color: transparent !important;
+    background: none !important;
+  }
+  .navbar__nav a::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    bottom: 0.15rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-bright), transparent);
+    box-shadow: 0 0 8px rgba(232, 197, 106, 0.8);
+    transition: left var(--transition), right var(--transition);
+  }
+  .navbar__nav a:hover::after,
+  .navbar__nav a.active::after { left: 0.6rem; right: 0.6rem; }
+  .navbar__nav a:hover,
+  .navbar__nav a.active { text-shadow: 0 0 12px rgba(201, 168, 76, 0.5); }
+}
+
+/* ── Pulsanti: oro brunito con riflesso che scorre ───────────── */
+.btn { position: relative; overflow: hidden; isolation: isolate; }
+
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 244, 214, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: -1;
+}
+.btn:hover:not(:disabled)::after { left: 120%; }
+
+.btn--primary {
+  background: linear-gradient(135deg, #e8c56a 0%, #c9a84c 45%, #a8862f 100%);
+  border-color: #d9b75c;
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.45), 0 4px 18px -6px rgba(201, 168, 76, 0.6);
+}
+.btn--primary:hover {
+  background: linear-gradient(135deg, #f4d98a 0%, #d8b75a 45%, #b8953a 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.6), 0 0 28px rgba(232, 197, 106, 0.45);
+}
+
+.btn--outline:hover { box-shadow: 0 0 22px -4px rgba(201, 168, 76, 0.5), inset 0 0 12px rgba(201, 168, 76, 0.08); }
+.btn--ghost:hover { background: rgba(255, 255, 255, 0.03); }
+
+/* ── HERO ─────────────────────────────────────────────────────── */
+.hero { overflow: hidden; isolation: isolate; }
+
+/* Raggi di luce che ruotano lentissimi dietro al sigillo */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  width: 180vmax;
+  height: 180vmax;
+  margin: -90vmax 0 0 -90vmax;
+  background: repeating-conic-gradient(from 0deg,
+    rgba(201, 168, 76, 0.045) 0deg 4deg,
+    transparent 4deg 18deg);
+  -webkit-mask: radial-gradient(circle, #000 0%, transparent 45%);
+          mask: radial-gradient(circle, #000 0%, transparent 45%);
+  animation: raysSpin 140s linear infinite;
+  will-change: transform;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero::after {
+  background:
+    radial-gradient(ellipse 45% 35% at 50% 38%, rgba(201, 168, 76, 0.10), transparent 70%),
+    linear-gradient(to bottom, transparent 70%, var(--bg-root) 100%);
+  z-index: 0;
+}
+
+@keyframes raysSpin { to { transform: rotate(360deg); } }
+
+.hero__seal {
+  animation: fadeInDown 1s ease 0.2s forwards, sealGlow 5s ease-in-out 1.4s infinite;
+}
+
+.hero__seal::before {
+  content: '';
+  position: absolute;
+  inset: -22px;
+  border-radius: 50%;
+  background: conic-gradient(from var(--halo-angle),
+    transparent 0deg, rgba(232, 197, 106, 0.9) 40deg, transparent 90deg,
+    transparent 180deg, rgba(178, 34, 34, 0.7) 220deg, transparent 270deg);
+  -webkit-mask: radial-gradient(circle, transparent 66%, #000 67%, #000 69%, transparent 70%);
+          mask: radial-gradient(circle, transparent 66%, #000 67%, #000 69%, transparent 70%);
+  animation: haloSpin 9s linear infinite;
+  pointer-events: none;
+}
+
+.hero__seal::after {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  border: 1px dashed rgba(201, 168, 76, 0.18);
+  animation: raysSpin 60s linear infinite reverse;
+  pointer-events: none;
+}
+
+@keyframes haloSpin { to { --halo-angle: 360deg; } }
+
+@keyframes sealGlow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(201, 168, 76, 0.25)); }
+  50%      { filter: drop-shadow(0 0 32px rgba(232, 197, 106, 0.55)); }
+}
+
+/* Titolo in oro inciso con riflesso che attraversa le lettere */
+.hero__title {
+  background: linear-gradient(100deg,
+    #b8a57a 0%, #f3ecd8 20%, #e8c56a 35%, #fff6dc 42%, #c9a84c 50%, #f3ecd8 70%, #b8a57a 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 4px 24px rgba(201, 168, 76, 0.25));
+  animation: fadeInUp 1s ease 0.5s forwards, titleShimmer 9s linear 1.6s infinite;
+}
+
+.hero__title::before,
+.hero__title::after { -webkit-text-fill-color: currentColor; }
+
+@keyframes titleShimmer {
+  from { background-position: 100% 0; }
+  to   { background-position: -150% 0; }
+}
+
+.hero__subtitle { text-shadow: 0 0 20px rgba(201, 168, 76, 0.45); }
+.hero__divider-icon { color: var(--gold); animation: pulse 3s ease-in-out infinite; }
+
+.hero__scroll {
+  position: absolute !important;
+  bottom: 1.75rem;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0;
+  animation: fadeIn 1s ease 2.2s forwards;
+}
+.hero__scroll:hover { color: var(--gold); }
+.hero__scroll::after {
+  content: '';
+  width: 1px;
+  height: 38px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollCue 2.2s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes scrollCue {
+  0%   { transform: scaleY(0); opacity: 0; }
+  40%  { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(1) translateY(14px); opacity: 0; }
+}
+
+/* ── Intestazioni di sezione e di pagina ─────────────────────── */
+.section-header__label,
+.page-header__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-header__label {
+  border-color: rgba(201, 168, 76, 0.35);
+  border-radius: 999px;
+  padding: 0.3rem 1rem;
+  background: rgba(201, 168, 76, 0.06);
+  box-shadow: 0 0 20px -6px rgba(201, 168, 76, 0.5);
+}
+
+.page-header__label::before {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+
+.section-header__title,
+.page-header__title {
+  background: linear-gradient(180deg, #f6f1e3 0%, #e4dcc4 45%, #c7ad6c 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 2px 18px rgba(201, 168, 76, 0.18));
+}
+
+.section-header__title::after {
+  content: '✦';
+  display: block;
+  width: 200px;
+  margin: 0.9rem auto 0;
+  font-size: 0.7rem;
+  line-height: 1;
+  text-align: center;
+  -webkit-text-fill-color: var(--gold);
+  color: var(--gold);
+  background: linear-gradient(90deg, transparent, var(--gold-dim) 30%, transparent 44%, transparent 56%, var(--gold-dim) 70%, transparent) center / 100% 1px no-repeat;
+}
+
+.page-header {
+  position: relative;
+  border-bottom: none;
+}
+.page-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold-dim), rgba(201, 168, 76, 0.25) 40%, transparent);
+}
+
+.home-section {
+  position: relative;
+  border-top: none;
+}
+.home-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+}
+
+/* ── Card: bordo e alone di luce che seguono il cursore ─────── */
+.feature-card {
+  --mx: 50%;
+  --my: 30%;
+  --card-surface: linear-gradient(160deg, #121110 0%, #0c0c0c 100%);
+  border: 1px solid transparent;
+  background:
+    radial-gradient(420px circle at var(--mx) var(--my), rgba(232, 197, 106, calc(var(--spot) * 0.11)), transparent 45%) padding-box,
+    var(--card-surface) padding-box,
+    radial-gradient(260px circle at var(--mx) var(--my), rgba(232, 197, 106, calc(0.15 + var(--spot) * 0.75)), var(--border) 70%) border-box;
+  box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.9);
+  transition: --spot 0.4s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow var(--transition);
+  transform-style: preserve-3d;
+}
+
+.feature-card:hover {
+  --spot: 1;
+  --card-surface: linear-gradient(160deg, #17150f 0%, #0e0d0b 100%);
+  border-color: transparent;
+  background:
+    radial-gradient(420px circle at var(--mx) var(--my), rgba(232, 197, 106, calc(var(--spot) * 0.11)), transparent 45%) padding-box,
+    var(--card-surface) padding-box,
+    radial-gradient(260px circle at var(--mx) var(--my), rgba(232, 197, 106, calc(0.15 + var(--spot) * 0.75)), var(--border) 70%) border-box;
+  transform: translateY(-4px);
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.95), 0 0 40px -12px rgba(201, 168, 76, 0.35);
+}
+
+.feature-card::before { display: none; }
+
+.feature-card__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  font-size: 1.6rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(201, 168, 76, 0.22), rgba(201, 168, 76, 0.04) 70%);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  box-shadow: inset 0 0 12px rgba(201, 168, 76, 0.12);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow var(--transition);
+}
+.feature-card:hover .feature-card__icon {
+  transform: translateZ(30px) scale(1.08) rotate(-6deg);
+  box-shadow: inset 0 0 12px rgba(201, 168, 76, 0.2), 0 0 24px rgba(201, 168, 76, 0.35);
+}
+
+.feature-card__title { transition: color var(--transition), text-shadow var(--transition); }
+.feature-card:hover .feature-card__title {
+  color: var(--gold-bright);
+  text-shadow: 0 0 18px rgba(201, 168, 76, 0.35);
+}
+
+.feature-card__image,
+.evento-card__image { transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter var(--transition-slow); }
+.feature-card:hover .feature-card__image,
+.feature-card:hover .evento-card__image { filter: saturate(1.15) contrast(1.05); }
+
+/* ── Statistiche: numeri incandescenti ───────────────────────── */
+.stats-strip {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(201, 168, 76, 0.08), transparent 70%),
+    linear-gradient(180deg, #111010, #0b0b0b);
+  border-color: rgba(201, 168, 76, 0.3);
+  box-shadow: 0 0 60px -30px rgba(201, 168, 76, 0.45), inset 0 1px 0 rgba(255, 240, 200, 0.05);
+}
+
+.stat-item {
+  padding: 2.25rem 1.5rem;
+  transition: background var(--transition);
+}
+.stat-item:hover { background: rgba(201, 168, 76, 0.05); }
+
+.stat-item__value {
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  color: var(--gold-bright);
+  text-shadow: 0 0 24px rgba(232, 197, 106, 0.45), 0 0 2px rgba(255, 240, 200, 0.6);
+}
+
+/* ── Citazione sacra ─────────────────────────────────────────── */
+.sacred-quote {
+  position: relative;
+  margin: 0;
+  padding: 4.25rem 2.5rem 2.5rem;
+  text-align: center;
+  font-style: normal;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(201, 168, 76, 0.08), transparent 70%),
+    var(--bg-surface);
+  box-shadow: 0 0 60px -30px rgba(201, 168, 76, 0.5);
+}
+.sacred-quote::before {
+  content: '“';
+  position: absolute;
+  top: 0.35rem;
+  left: 50%;
+  translate: -50% 0;
+  font-family: var(--font-display);
+  font-size: 4rem;
+  line-height: 1;
+  color: var(--gold);
+  opacity: 0.85;
+  text-shadow: 0 0 20px rgba(201, 168, 76, 0.5);
+}
+.sacred-quote__corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.7;
+}
+.sacred-quote__corner--tl { top: 8px;    left: 8px;  border-width: 1px 0 0 1px; }
+.sacred-quote__corner--tr { top: 8px;    right: 8px; border-width: 1px 1px 0 0; }
+.sacred-quote__corner--bl { bottom: 8px; left: 8px;  border-width: 0 0 1px 1px; }
+.sacred-quote__corner--br { bottom: 8px; right: 8px; border-width: 0 1px 1px 0; }
+.sacred-quote__text {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  font-style: italic;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+.sacred-quote__cite {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-style: normal;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Card generiche, modali, form ────────────────────────────── */
+.card {
+  background: linear-gradient(170deg, #121110 0%, #0d0d0d 100%);
+  box-shadow: 0 16px 40px -24px rgba(0, 0, 0, 0.95);
+}
+.card--gold {
+  border-color: rgba(201, 168, 76, 0.35);
+  box-shadow: 0 0 50px -24px rgba(201, 168, 76, 0.5), inset 0 1px 0 rgba(255, 240, 200, 0.05);
+}
+
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover { border-color: var(--border-gold); }
+
+/* ── Footer ──────────────────────────────────────────────────── */
+.footer {
+  position: relative;
+  border-top: none;
+  background: linear-gradient(180deg, transparent, rgba(201, 168, 76, 0.03));
+}
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::before,
+  .hero__seal::before,
+  .hero__seal::after,
+  .hero__title,
+  .hero__scroll::after { animation: none !important; }
+  .hero__title, .hero__seal { opacity: 1 !important; }
+  .torch { display: none; }
+}
+
+@media (max-width: 600px) {
+  .hero__seal::after { inset: -28px; }
+  .sacred-quote { padding: 3rem 1.25rem 2rem; }
+  .hero__scroll { display: none; }
 }
