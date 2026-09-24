@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Account — La Setta del Semmen</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <div class="navbar__logo seal-container"></div>
+        La Setta del Semmen
+      </a>
+      <button class="navbar__burger" id="navbar-burger" aria-label="Apri menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="navbar__menu" id="navbar-menu">
+        <ul class="navbar__nav">
+          <li><a href="index.html">Sanctuarium</a></li>
+          <li><a href="wiki.html">Archivio</a></li>
+          <li><a href="discepoli.html">Discepoli</a></li>
+          <li><a href="eventi.html">Eventi</a></li>
+          <li><a href="candidatura.html">Candidati</a></li>
+          <li><a href="shop.html">Shop</a></li>
+        </ul>
+        <div class="navbar__auth" id="navbar-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" id="page-main" style="padding-top:3rem;padding-bottom:6rem;max-width:560px;">
+
+    <div class="page-header">
+      <p class="page-header__label">Area Riservata</p>
+      <h1 class="page-header__title">Il Tuo Account</h1>
+    </div>
+
+    <div class="card card--gold" id="account-card" style="margin-top:2rem;">
+      <div class="card__body">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <p id="account-email" style="font-family:var(--font-mono);">—</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Grado nel Sistema</label>
+          <p id="account-role" style="font-family:var(--font-mono);color:var(--gold);">—</p>
+        </div>
+
+        <form id="profile-form">
+          <div class="form-group">
+            <label class="form-label" for="account-nome">Nome e Cognome</label>
+            <input type="text" id="account-nome" name="full_name" class="form-input" placeholder="Il tuo nome">
+          </div>
+          <p class="pw-box__error" id="profile-error"></p>
+          <p style="color:var(--gold);font-size:0.85rem;font-family:var(--font-mono);" id="profile-success"></p>
+          <button type="submit" class="btn btn--outline" style="width:100%;">Salva Nome</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="card__body">
+        <h3 style="font-size:1.1rem;margin-bottom:1rem;">Cambia Password</h3>
+        <form id="password-form">
+          <div class="form-group">
+            <label class="form-label" for="new-password">Nuova Password</label>
+            <input type="password" id="new-password" name="password" class="form-input" placeholder="Almeno 8 caratteri" minlength="8" required>
+          </div>
+          <p class="pw-box__error" id="password-error"></p>
+          <p style="color:var(--gold);font-size:0.85rem;font-family:var(--font-mono);" id="password-success"></p>
+          <button type="submit" class="btn btn--primary" style="width:100%;">Aggiorna Password</button>
+        </form>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn--ghost" id="logout-btn" style="width:100%;margin-top:1.5rem;">
+      Esci dall'Account
+    </button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo seal-container"></div>
+        <span class="footer__name">La Setta del Semmen</span>
+      </div>
+      <div class="footer__legal">
+        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        Tutti i meme sono riservati. Riproduzione vietata.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    (async () => {
+      const profile = await SemmenAuth.requireRole();
+      if (!profile) return;
+
+      document.getElementById('account-email').textContent = profile.email;
+      document.getElementById('account-role').textContent  = SemmenAuth.ROLE_LABELS[profile.role] || profile.role;
+      document.getElementById('account-nome').value = profile.full_name || '';
+
+      document.getElementById('profile-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const errorEl = document.getElementById('profile-error');
+        const successEl = document.getElementById('profile-success');
+        errorEl.textContent = '';
+        successEl.textContent = '';
+
+        const full_name = document.getElementById('account-nome').value.trim();
+        const { error } = await SemmenAuth.db()
+          .from('profiles')
+          .update({ full_name })
+          .eq('id', profile.id);
+
+        if (error) { errorEl.textContent = error.message; return; }
+        successEl.textContent = '✓ Nome aggiornato.';
+      });
+
+      document.getElementById('password-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const errorEl = document.getElementById('password-error');
+        const successEl = document.getElementById('password-success');
+        errorEl.textContent = '';
+        successEl.textContent = '';
+
+        const password = document.getElementById('new-password').value;
+        const { error } = await SemmenAuth.client.auth.updateUser({ password });
+
+        if (error) { errorEl.textContent = error.message; return; }
+        successEl.textContent = '✓ Password aggiornata.';
+        document.getElementById('password-form').reset();
+      });
+
+      document.getElementById('logout-btn').addEventListener('click', SemmenAuth.signOut);
+    })();
+  </script>
+</body>
+</html>

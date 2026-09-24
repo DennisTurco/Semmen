@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Accedi — La Setta del Semmen</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <div class="navbar__logo seal-container"></div>
+        La Setta del Semmen
+      </a>
+      <button class="navbar__burger" id="navbar-burger" aria-label="Apri menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="navbar__menu" id="navbar-menu">
+        <ul class="navbar__nav">
+          <li><a href="index.html">Sanctuarium</a></li>
+          <li><a href="wiki.html">Archivio</a></li>
+          <li><a href="discepoli.html">Discepoli</a></li>
+          <li><a href="eventi.html">Eventi</a></li>
+          <li><a href="candidatura.html">Candidati</a></li>
+          <li><a href="shop.html">Shop</a></li>
+        </ul>
+        <div class="navbar__auth" id="navbar-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top:3rem;padding-bottom:6rem;max-width:480px;">
+    <div class="pw-box" style="max-width:100%;">
+      <div class="pw-box__seal seal-container"></div>
+      <h2 class="pw-box__title">Accedi alla Setta</h2>
+      <p class="pw-box__subtitle">Entra con le credenziali del tuo account</p>
+
+      <div id="config-warning" class="alert alert--error hidden" style="text-align:left;margin-bottom:1.5rem;">
+        Supabase non è ancora configurato per questo sito (<code>js/config.js</code>).
+      </div>
+
+      <form id="login-form">
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label" for="login-email">Email <span class="required">*</span></label>
+          <input type="email" id="login-email" name="email" class="form-input" placeholder="tua@email.com" required>
+        </div>
+
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label" for="login-password">Password <span class="required">*</span></label>
+          <input type="password" id="login-password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+
+        <p class="pw-box__error" id="login-error"></p>
+
+        <button type="submit" class="btn btn--primary" style="width:100%;" id="login-submit-btn">
+          <span id="login-submit-text">Accedi</span>
+          <span class="loading__spinner hidden" id="login-submit-spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-left:0.5rem;"></span>
+        </button>
+      </form>
+
+      <p style="margin-top:1.5rem;font-family:var(--font-ui);font-size:0.85rem;color:var(--text-muted);">
+        Non hai un account? <a href="registrati.html">Registrati</a><br>
+        <a href="password-dimenticata.html">Password dimenticata?</a>
+      </p>
+
+      <a href="index.html" class="btn btn--ghost" style="width:100%;margin-top:0.75rem;text-align:center;">
+        ← Torna al Sanctuarium
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo seal-container"></div>
+        <span class="footer__name">La Setta del Semmen</span>
+      </div>
+      <div class="footer__legal">
+        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        Tutti i meme sono riservati. Riproduzione vietata.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    const form         = document.getElementById('login-form');
+    const errorEl      = document.getElementById('login-error');
+    const submitBtn    = document.getElementById('login-submit-btn');
+    const submitText   = document.getElementById('login-submit-text');
+    const submitSpinner = document.getElementById('login-submit-spinner');
+
+    if (!SemmenAuth.configured) {
+      document.getElementById('config-warning').classList.remove('hidden');
+      form.querySelectorAll('input, button').forEach(el => el.disabled = true);
+    }
+
+    // Se già loggato, vai dritto all'account
+    (async () => {
+      if (SemmenAuth.configured && await SemmenAuth.getSession()) {
+        location.href = 'account.html';
+      }
+    })();
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!SemmenAuth.configured) return;
+
+      errorEl.textContent = '';
+      submitBtn.disabled = true;
+      submitText.textContent = 'Accesso in corso...';
+      submitSpinner.classList.remove('hidden');
+
+      const email    = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      const { error } = await SemmenAuth.client.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        errorEl.textContent = error.message === 'Invalid login credentials'
+          ? 'Email o password errati.'
+          : error.message;
+        submitBtn.disabled = false;
+        submitText.textContent = 'Accedi';
+        submitSpinner.classList.add('hidden');
+        return;
+      }
+
+      const params = new URLSearchParams(location.search);
+      location.href = params.get('redirect') || 'account.html';
+    });
+  </script>
+</body>
+</html>

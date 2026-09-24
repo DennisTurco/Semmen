@@ -1,24 +1,26 @@
-name: Deploy to GitHub Pages
+name: Deploy to Vercel
 
 on:
   push:
-    branches: ["main"]
+    branches: ["master"]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
+  group: "vercel-production"
   cancel-in-progress: false
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
   deploy:
     environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +32,8 @@ jobs:
       - name: Inject secrets into config
         env:
           WIKI_PASSWORD:            ${{ secrets.WIKI_PASSWORD }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY:        ${{ secrets.SUPABASE_ANON_KEY }}
           EMAILJS_PUBLIC_KEY:       ${{ secrets.EMAILJS_PUBLIC_KEY }}
           EMAILJS_SERVICE_ID:       ${{ secrets.EMAILJS_SERVICE_ID }}
           EMAILJS_TEMPLATE_ID:      ${{ secrets.EMAILJS_TEMPLATE_ID }}
@@ -37,20 +41,25 @@ jobs:
           EMAILJS_RECIPIENT:        ${{ secrets.EMAILJS_RECIPIENT }}
         run: |
           sed -i "s|__WIKI_PASSWORD__|${WIKI_PASSWORD}|g"                 js/config.js
+          sed -i "s|__SUPABASE_URL__|${SUPABASE_URL}|g"                   js/config.js
+          sed -i "s|__SUPABASE_ANON_KEY__|${SUPABASE_ANON_KEY}|g"         js/config.js
           sed -i "s|__EMAILJS_PUBLIC_KEY__|${EMAILJS_PUBLIC_KEY}|g"       js/config.js
           sed -i "s|__EMAILJS_SERVICE_ID__|${EMAILJS_SERVICE_ID}|g"       js/config.js
           sed -i "s|__EMAILJS_TEMPLATE_ID__|${EMAILJS_TEMPLATE_ID}|g"     js/config.js
           sed -i "s|__EMAILJS_SHOP_TEMPLATE_ID__|${EMAILJS_SHOP_TEMPLATE_ID}|g" js/config.js
           sed -i "s|__EMAILJS_RECIPIENT__|${EMAILJS_RECIPIENT}|g"         js/config.js
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "."
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Build project (static, no framework)
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> "$GITHUB_OUTPUT"

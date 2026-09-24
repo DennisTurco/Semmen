@@ -128,6 +128,21 @@ form.addEventListener('submit', async e => {
     await emailjs.send(CONFIG.email.serviceId, CONFIG.email.templateId, {
       to_email:        CONFIG.email.recipient,
       subject:         `${CONFIG.email.subjectPrefix} ${data.nome} ${data.cognome}`,
+      message:
+        `Nuova candidatura alla Setta\n\n` +
+        `Nome: ${data.nome} ${data.cognome}\n` +
+        `Email: ${data.email}\n` +
+        `Telefono: ${data.telefono}\n` +
+        `Discord: ${data.discord || 'N/D'}\n` +
+        `Età: ${data.eta}\n` +
+        `Sesso: ${data.sesso}\n` +
+        `Professione: ${data.professione}\n` +
+        `Provenienza: ${data.provenienza}\n\n` +
+        `Come ci ha trovati: ${data.find_us}\n` +
+        `Motivazione: ${data.motivazione}\n` +
+        `Flosscio: ${data.flosscio || 'N/D'}\n` +
+        `Risposta giusta: ${data.risposta_giusta || 'N/D'}\n\n` +
+        `Data candidatura: ${new Date().toLocaleString('it-IT')}`,
 
       // Dati candidato
       nome:            data.nome,

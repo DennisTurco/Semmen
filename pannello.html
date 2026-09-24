@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Pannello — La Setta del Semmen</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border-gold);
+      margin: 2rem 0 2rem;
+    }
+
+    .tab-btn {
+      padding: 0.6rem 1.2rem;
+      font-family: var(--font-ui);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .tab-btn:hover { color: var(--text-primary); }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+      margin-bottom: 2.5rem;
+    }
+
+    .admin-table th, .admin-table td {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .admin-table th {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .admin-table select { min-width: 140px; }
+
+    .row-actions { display: flex; gap: 0.5rem; }
+    .row-actions .btn { padding: 0.3rem 0.7rem; font-size: 0.7rem; }
+
+    .entry-form {
+      border: 1px dashed var(--border-gold);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .entry-form__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 700px) {
+      .entry-form__grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <div class="navbar__logo seal-container"></div>
+        La Setta del Semmen
+      </a>
+      <button class="navbar__burger" id="navbar-burger" aria-label="Apri menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="navbar__menu" id="navbar-menu">
+        <ul class="navbar__nav">
+          <li><a href="index.html">Sanctuarium</a></li>
+          <li><a href="wiki.html">Archivio</a></li>
+          <li><a href="discepoli.html">Discepoli</a></li>
+          <li><a href="eventi.html">Eventi</a></li>
+          <li><a href="candidatura.html">Candidati</a></li>
+          <li><a href="shop.html">Shop</a></li>
+        </ul>
+        <div class="navbar__auth" id="navbar-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" id="page-main" style="padding-top:3rem;padding-bottom:6rem;">
+
+    <div class="page-header">
+      <p class="page-header__label">Sala del Consiglio</p>
+      <h1 class="page-header__title">Pannello di Gestione</h1>
+      <p class="page-header__subtitle">Gestisci contenuti del sito e, se Admin, gli utenti registrati.</p>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="eventi" type="button">Eventi</button>
+      <button class="tab-btn" data-tab="discepoli" type="button">Discepoli</button>
+      <button class="tab-btn hidden" data-tab="utenti" id="tab-btn-utenti" type="button">Utenti</button>
+    </div>
+
+    <!-- ── EVENTI ─────────────────────────────────────────────── -->
+    <section class="tab-panel active" id="tab-eventi">
+      <div class="entry-form">
+        <h3 style="margin-bottom:1rem;">Nuovo Evento</h3>
+        <form id="evento-form">
+          <input type="hidden" id="evento-id" value="">
+          <div class="entry-form__grid">
+            <div class="form-group">
+              <label class="form-label" for="evento-titolo">Titolo <span class="required">*</span></label>
+              <input type="text" id="evento-titolo" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="evento-stato">Stato</label>
+              <select id="evento-stato" class="form-select">
+                <option>In programma</option>
+                <option>Imminente</option>
+                <option>Passato</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="evento-data">Data (per ordinamento)</label>
+              <input type="date" id="evento-data" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="evento-data-testo">Data mostrata (testo libero)</label>
+              <input type="text" id="evento-data-testo" class="form-input" placeholder="es. Ottobre 2026 — data da definire">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="evento-durata">Durata</label>
+              <input type="text" id="evento-durata" class="form-input" placeholder="es. 5-6 giorni">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="evento-luogo">Luogo</label>
+              <input type="text" id="evento-luogo" class="form-input">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="evento-immagine">URL Immagine di Copertina</label>
+              <input type="text" id="evento-immagine" class="form-input" placeholder="img/eventi/nome-file.jpg">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="evento-credito">Credito Immagine (facoltativo)</label>
+              <input type="text" id="evento-credito" class="form-input" placeholder="Foto: Autore / Fonte (Licenza)">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="evento-descrizione">Descrizione</label>
+              <textarea id="evento-descrizione" class="form-textarea" rows="3"></textarea>
+            </div>
+          </div>
+          <p class="pw-box__error" id="evento-error"></p>
+          <div style="display:flex;gap:0.75rem;">
+            <button type="submit" class="btn btn--primary" id="evento-submit-btn">Salva Evento</button>
+            <button type="button" class="btn btn--ghost hidden" id="evento-cancel-btn">Annulla Modifica</button>
+          </div>
+        </form>
+      </div>
+
+      <table class="admin-table" id="eventi-table">
+        <thead>
+          <tr><th>Titolo</th><th>Stato</th><th>Data</th><th>Candidati</th><th>Azioni</th></tr>
+        </thead>
+        <tbody id="eventi-tbody"></tbody>
+      </table>
+    </section>
+
+    <!-- ── DISCEPOLI ──────────────────────────────────────────── -->
+    <section class="tab-panel" id="tab-discepoli">
+      <div class="entry-form">
+        <h3 style="margin-bottom:1rem;">Nuovo Discepolo</h3>
+        <form id="discepolo-form">
+          <input type="hidden" id="discepolo-id" value="">
+          <div class="entry-form__grid">
+            <div class="form-group">
+              <label class="form-label" for="discepolo-nome">Nome <span class="required">*</span></label>
+              <input type="text" id="discepolo-nome" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="discepolo-grado">Grado <span class="required">*</span></label>
+              <input type="text" id="discepolo-grado" class="form-input" placeholder="es. Adepto del Semmen" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="discepolo-simbolo">Simbolo</label>
+              <input type="text" id="discepolo-simbolo" class="form-input" placeholder="es. ✦✦✦">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="discepolo-ordine">Ordine grado (0 = più alto)</label>
+              <input type="number" id="discepolo-ordine" class="form-input" value="0">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="discepolo-nota">Nota (facoltativa)</label>
+              <input type="text" id="discepolo-nota" class="form-input">
+            </div>
+          </div>
+          <p class="pw-box__error" id="discepolo-error"></p>
+          <div style="display:flex;gap:0.75rem;">
+            <button type="submit" class="btn btn--primary" id="discepolo-submit-btn">Salva Discepolo</button>
+            <button type="button" class="btn btn--ghost hidden" id="discepolo-cancel-btn">Annulla Modifica</button>
+          </div>
+        </form>
+      </div>
+
+      <table class="admin-table" id="discepoli-table">
+        <thead>
+          <tr><th>Nome</th><th>Grado</th><th>Ordine</th><th>Nota</th><th>Azioni</th></tr>
+        </thead>
+        <tbody id="discepoli-tbody"></tbody>
+      </table>
+    </section>
+
+    <!-- ── UTENTI (solo Admin) ────────────────────────────────── -->
+    <section class="tab-panel" id="tab-utenti">
+      <table class="admin-table" id="utenti-table">
+        <thead>
+          <tr><th>Nome</th><th>Email</th><th>Ruolo</th><th>Registrato il</th><th></th></tr>
+        </thead>
+        <tbody id="utenti-tbody"></tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo seal-container"></div>
+        <span class="footer__name">La Setta del Semmen</span>
+      </div>
+      <div class="footer__legal">
+        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        Tutti i meme sono riservati. Riproduzione vietata.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/pannello.js"></script>
+</body>
+</html>

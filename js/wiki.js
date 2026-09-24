@@ -30,7 +30,7 @@ const WIKI_MANIFEST = {
       label: "La Setta",
       pages: [
         { id: "storia",    title: "Storia della Setta",  protected: true },
-        { id: "gerarchia", title: "Gerarchia Interna",    protected: true, badge: "NUOVO" }
+        { id: "gerarchia", title: "Gerarchia Interna",    badge: "NUOVO" }
       ]
     },
     {
@@ -119,7 +119,7 @@ author: Il Ahckmed, Creatore del Semmen Fondatore
 "gerarchia": `---
 title: Gerarchia Interna
 category: La Setta
-classification: RISERVATO
+classification: PUBBLICO
 author: Consiglio dei Grandi Maestri
 ---
 
@@ -205,9 +205,15 @@ Ad esse va il messimo rispetto e la massima devozione, sono responsabili dell'es
 
 ### ✦ Adepto del Semmen
 
-*Grado V — Membro standard.*
+*Grado V — Membro accettato, in attesa del Rito.*
 
-Membro regolare della Setta, superato il rito di iniziazione.
+Colui che si è candidato alla Setta ed è stato accettato dai Grandi Maestri,
+ma non ha ancora svolto il Rito di Iniziazione Completo.
+È a tutti gli effetti un membro della Setta, ma non gode ancora di tutti i privilegi
+riservati agli iniziati.
+
+**Privilegi:** Accesso ai canali riservati della Setta. Può candidarsi a partecipare
+agli eventi della Setta. Diritto di voto limitato.
 
 ---
 
@@ -217,6 +223,7 @@ Membro regolare della Setta, superato il rito di iniziazione.
 
 Colui che ha presentato candidatura e attende il verdetto.
 Accesso limitato. Nessun diritto di voto. Nessuna colpa se rifiutato.
+Se accettato, diventa Adepto del Semmen in attesa del Rito di Iniziazione Completo.
 
 ---
 
