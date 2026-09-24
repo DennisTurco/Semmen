@@ -34,7 +34,7 @@ let mieParteciazioni = new Set();
 /* ── Caricamento dati ───────────────────────────────────────── */
 async function loadEventi() {
   if (SemmenAuth.configured) {
-    const { data, error } = await db().from('eventi').select('*').order('data', { ascending: false });
+    const { data, error } = await db().from('eventi').select('*').order('data', { ascending: true });
     if (!error && data && data.length > 0) {
       eventiFromDb = true;
       return data.map(ev => ({
@@ -52,7 +52,9 @@ async function loadEventi() {
     }
   }
   eventiFromDb = false;
-  return (CONFIG.eventi || []).map((ev, i) => ({ id: `local-${i}`, ...ev, stato: calcolaStatoEvento(ev.data) }));
+  return (CONFIG.eventi || [])
+    .map((ev, i) => ({ id: `local-${i}`, ...ev, stato: calcolaStatoEvento(ev.data) }))
+    .sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 }
 
 async function loadMiePartecipazioni() {
@@ -230,10 +232,20 @@ partecipaForm.addEventListener('submit', async e => {
   render();
 });
 
-/* ── Init ───────────────────────────────────────────────────── */
+/* ── Init ───────────────────────────────────────────────────────
+   Il profilo e l'elenco eventi sono indipendenti: partivano in serie
+   (3 round-trip a Supabase uno dopo l'altro), rendendo il caricamento
+   percepito molto più lento del necessario. Ora profilo ed eventi
+   partono in parallelo, e le "mie partecipazioni" (che dipendono dal
+   profilo) partono non appena il profilo risolve, senza aspettare che
+   gli eventi siano già arrivati. */
 (async function init() {
-  if (SemmenAuth.configured) currentProfile = await SemmenAuth.getProfile();
-  eventi = await loadEventi();
-  mieParteciazioni = await loadMiePartecipazioni();
+  const profilePromise = SemmenAuth.configured ? SemmenAuth.getProfile() : Promise.resolve(null);
+  const eventiPromise  = loadEventi();
+
+  currentProfile = await profilePromise;
+  const partecipazioniPromise = loadMiePartecipazioni();
+
+  [eventi, mieParteciazioni] = await Promise.all([eventiPromise, partecipazioniPromise]);
   render();
 })();

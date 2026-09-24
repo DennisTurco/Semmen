@@ -36,12 +36,12 @@
 
   <div class="container" id="page-main" style="padding-top:3rem;padding-bottom:6rem;max-width:560px;">
 
-    <div class="page-header">
+    <div class="page-header" data-reveal>
       <p class="page-header__label">Area Riservata</p>
       <h1 class="page-header__title">Il Tuo Account</h1>
     </div>
 
-    <div class="card card--gold" id="account-card" style="margin-top:2rem;">
+    <div class="card card--gold mt-4" id="account-card" data-reveal>
       <div class="card__body">
         <div class="form-group">
           <label class="form-label">Email</label>
@@ -67,37 +67,37 @@
             <input type="text" id="account-username" name="username" class="form-input" placeholder="es. druido_prosciutto" pattern="[a-zA-Z0-9_.]{3,24}">
           </div>
           <p class="pw-box__error" id="profile-error"></p>
-          <p style="color:var(--gold);font-size:0.85rem;font-family:var(--font-mono);" id="profile-success"></p>
-          <button type="submit" class="btn btn--outline" style="width:100%;">Salva</button>
+          <p class="field-success" id="profile-success"></p>
+          <button type="submit" class="btn btn--outline btn--block">Salva</button>
         </form>
       </div>
     </div>
 
-    <div class="card" style="margin-top:1.5rem;">
+    <div class="card mt-3" data-reveal>
       <div class="card__body">
-        <h3 style="font-size:1.1rem;margin-bottom:1rem;">Le Tue Partecipazioni agli Eventi</h3>
+        <h3 class="card__subtitle">Le Tue Partecipazioni agli Eventi</h3>
         <div id="partecipazioni-list">
-          <p style="color:var(--text-muted);font-size:0.85rem;">Caricamento...</p>
+          <p class="list-empty">Caricamento...</p>
         </div>
       </div>
     </div>
 
-    <div class="card" style="margin-top:1.5rem;">
+    <div class="card mt-3" data-reveal>
       <div class="card__body">
-        <h3 style="font-size:1.1rem;margin-bottom:1rem;">Cambia Password</h3>
+        <h3 class="card__subtitle">Cambia Password</h3>
         <form id="password-form">
           <div class="form-group">
             <label class="form-label" for="new-password">Nuova Password</label>
             <input type="password" id="new-password" name="password" class="form-input" placeholder="Almeno 8 caratteri" minlength="8" required>
           </div>
           <p class="pw-box__error" id="password-error"></p>
-          <p style="color:var(--gold);font-size:0.85rem;font-family:var(--font-mono);" id="password-success"></p>
-          <button type="submit" class="btn btn--primary" style="width:100%;">Aggiorna Password</button>
+          <p class="field-success" id="password-success"></p>
+          <button type="submit" class="btn btn--primary btn--block">Aggiorna Password</button>
         </form>
       </div>
     </div>
 
-    <button type="button" class="btn btn--ghost" id="logout-btn" style="width:100%;margin-top:1.5rem;">
+    <button type="button" class="btn btn--ghost btn--block mt-3" id="logout-btn">
       Esci dall'Account
     </button>
   </div>
@@ -110,7 +110,7 @@
         <span class="footer__name">La Setta del Semmen</span>
       </div>
       <div class="footer__legal">
-        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        © Anno Domini MMXXV · La Setta del Semmen<br>
         Tutti i meme sono riservati. Riproduzione vietata.
       </div>
     </div>
@@ -185,7 +185,7 @@
         if (error) { listEl.innerHTML = `<p class="pw-box__error">${error.message}</p>`; return; }
 
         if (!data || data.length === 0) {
-          listEl.innerHTML = `<p style="color:var(--text-muted);font-size:0.85rem;">
+          listEl.innerHTML = `<p class="list-empty">
             Nessuna candidatura ad eventi. Sfoglia gli <a href="eventi.html">Eventi</a> della Setta.
           </p>`;
           return;
@@ -195,10 +195,10 @@
           const ev = p.eventi;
           const stato = ev ? calcolaStatoEvento(ev.data) : '—';
           return `
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--border);">
+            <div class="list-row">
               <div>
-                <p style="font-family:var(--font-ui);color:var(--text-primary);">${ev ? ev.titolo : 'Evento eliminato'}</p>
-                <p style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">
+                <p class="list-row__title">${ev ? ev.titolo : 'Evento eliminato'}</p>
+                <p class="list-row__meta">
                   ${ev ? (ev.data_testo || ev.data || '') : ''} · ${stato}
                 </p>
               </div>

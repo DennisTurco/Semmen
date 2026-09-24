@@ -103,7 +103,7 @@
   }
 
   async function loadEventi() {
-    const { data: eventi, error } = await sb.from('eventi').select('*').order('data', { ascending: false });
+    const { data: eventi, error } = await sb.from('eventi').select('*').order('data', { ascending: true });
     if (error) { eventoError.textContent = error.message; return; }
 
     const { data: partecipazioni } = await sb.from('event_partecipazioni').select('evento_id');

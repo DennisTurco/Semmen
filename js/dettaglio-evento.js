@@ -69,7 +69,7 @@ async function loadPartecipanti() {
   if (error) { listEl.innerHTML = `<p class="pw-box__error">${error.message}</p>`; return; }
 
   if (!partecipanti || partecipanti.length === 0) {
-    listEl.innerHTML = `<p style="color:var(--text-muted);font-size:0.85rem;">Nessuno ha ancora aderito a questo evento.</p>`;
+    listEl.innerHTML = `<p class="list-empty">Nessuno ha ancora aderito a questo evento.</p>`;
     return;
   }
 
@@ -84,10 +84,10 @@ async function loadPartecipanti() {
     const puoRimuovere = puoGestireTutti || p.user_id === currentProfile.id;
 
     return `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--border);">
+      <div class="list-row">
         <div>
-          <p style="font-family:var(--font-ui);color:var(--text-primary);">${nome}</p>
-          <p style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">
+          <p class="list-row__title">${nome}</p>
+          <p class="list-row__meta">
             ${gradoLabel ? gradoLabel + ' · ' : ''}Adesione: ${formatData(p.created_at.slice(0, 10))}
             ${p.note ? ' · ' + p.note : ''}
           </p>

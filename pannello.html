@@ -58,6 +58,9 @@
       vertical-align: middle;
     }
 
+    .admin-table tbody tr { transition: background var(--transition-fast); }
+    .admin-table tbody tr:hover { background: var(--bg-elevated); }
+
     .admin-table th {
       font-family: var(--font-mono);
       font-size: 0.7rem;
@@ -117,7 +120,7 @@
 
   <div class="container" id="page-main" style="padding-top:3rem;padding-bottom:6rem;">
 
-    <div class="page-header">
+    <div class="page-header" data-reveal>
       <p class="page-header__label">Sala del Consiglio</p>
       <h1 class="page-header__title">Pannello di Gestione</h1>
       <p class="page-header__subtitle">Gestisci contenuti del sito e, se Admin, gli utenti registrati.</p>
@@ -321,7 +324,7 @@
         <span class="footer__name">La Setta del Semmen</span>
       </div>
       <div class="footer__legal">
-        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        © Anno Domini MMXXV · La Setta del Semmen<br>
         Tutti i meme sono riservati. Riproduzione vietata.
       </div>
     </div>

@@ -42,7 +42,10 @@
       border-radius: var(--radius);
       padding: 1rem;
       min-height: 100px;
+      transition: border-color var(--transition);
     }
+
+    .kanban-col:hover { border-color: var(--border-gold); }
 
     .kanban-col__header {
       display: flex;
@@ -67,6 +70,12 @@
       border-radius: var(--radius-sm);
       padding: 0.85rem;
       margin-bottom: 0.85rem;
+      transition: border-color var(--transition), transform var(--transition-fast);
+    }
+
+    .attivita-card:hover {
+      border-left-color: var(--gold);
+      transform: translateX(2px);
     }
 
     .attivita-card__titolo {
@@ -141,7 +150,7 @@
 
   <div class="container" id="page-main" style="padding-top:3rem;padding-bottom:6rem;">
 
-    <div class="page-header">
+    <div class="page-header" data-reveal>
       <p class="page-header__label">Sala del Consiglio</p>
       <h1 class="page-header__title">Attività</h1>
       <p class="page-header__subtitle">Bacheca condivisa per dividersi il lavoro, tecnico e non, dell'Ordine.</p>
@@ -200,7 +209,7 @@
         <span class="footer__name">La Setta del Semmen</span>
       </div>
       <div class="footer__legal">
-        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        © Anno Domini MMXXV · La Setta del Semmen<br>
         Tutti i meme sono riservati. Riproduzione vietata.
       </div>
     </div>

@@ -65,7 +65,7 @@ const SEAL_SVG = `<svg class="seal" viewBox="0 0 200 200" xmlns="http://www.w3.o
 
   <!-- Testo circolare -->
   <text font-family="'IM Fell English', Georgia, serif" font-size="9.5" fill="currentColor" letter-spacing="3.2" opacity="0.8">
-    <textPath href="#outerRing" startOffset="3%">· LA SETTA DEL SEMMEN · EST. MMXXIV ·</textPath>
+    <textPath href="#outerRing" startOffset="3%">· LA SETTA DEL SEMMEN · EST. MMXXV ·</textPath>
   </text>
 
   <!-- Stella centrale -->
@@ -99,8 +99,18 @@ function calcolaStatoEvento(dataStr) {
   return 'In programma';
 }
 
-/* ── Animazioni on-scroll ───────────────────────────────────── */
-if ('IntersectionObserver' in window) {
+/* ── Animazioni on-scroll ───────────────────────────────────────
+   Diverse pagine (eventi.js, discepoli.html, attivita.js…) iniettano
+   card con [data-reveal] DOPO il caricamento di main.js (es. dopo una
+   fetch a Supabase), quindi non basta osservare gli elementi presenti
+   al momento del load: un MutationObserver aggancia anche quelli
+   aggiunti dinamicamente in seguito. */
+(function initScrollReveal() {
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('is-visible'));
+    return;
+  }
+
   const observer = new IntersectionObserver(
     entries => entries.forEach(e => {
       if (e.isIntersecting) {
@@ -110,5 +120,18 @@ if ('IntersectionObserver' in window) {
     }),
     { threshold: 0.1 }
   );
-  document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
-}
+
+  function observeAll(root) {
+    root.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+  }
+
+  observeAll(document);
+
+  new MutationObserver(mutations => {
+    mutations.forEach(m => m.addedNodes.forEach(node => {
+      if (node.nodeType !== 1) return;
+      if (node.matches && node.matches('[data-reveal]')) observer.observe(node);
+      if (node.querySelectorAll) observeAll(node);
+    }));
+  }).observe(document.body, { childList: true, subtree: true });
+})();

@@ -3,7 +3,7 @@ const CONFIG = {
   site: {
     name:    "La Setta del Semmen",
     tagline: "Ordo Arcanus Memorum",
-    year:    "MMXXIV",
+    year:    "MMXXV",
     baseUrl: "",
   },
 
