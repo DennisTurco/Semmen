@@ -2,6 +2,10 @@
 .env.local
 node_modules/
 
+# Generato da scripts/build-config.js (contiene secret in chiaro).
+# Il template versionato è js/config.template.js.
+js/config.js
+
 # OS
 .DS_Store
 Thumbs.db

@@ -27,27 +27,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Sostituisce i placeholder in config.js con i valori dei GitHub Secrets.
-      # I secrets si configurano in: Settings → Secrets and variables → Actions
-      - name: Inject secrets into config
+      # Genera js/config.js da js/config.template.js sostituendo i placeholder
+      # con i GitHub Secrets (stesso script usato in locale con .env.local:
+      # scripts/build-config.js). I secrets si configurano in:
+      # Settings → Secrets and variables → Actions
+      - name: Build config.js from secrets
         env:
-          WIKI_PASSWORD:            ${{ secrets.WIKI_PASSWORD }}
-          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY:        ${{ secrets.SUPABASE_ANON_KEY }}
-          EMAILJS_PUBLIC_KEY:       ${{ secrets.EMAILJS_PUBLIC_KEY }}
-          EMAILJS_SERVICE_ID:       ${{ secrets.EMAILJS_SERVICE_ID }}
-          EMAILJS_TEMPLATE_ID:      ${{ secrets.EMAILJS_TEMPLATE_ID }}
-          EMAILJS_SHOP_TEMPLATE_ID: ${{ secrets.EMAILJS_SHOP_TEMPLATE_ID }}
-          EMAILJS_RECIPIENT:        ${{ secrets.EMAILJS_RECIPIENT }}
-        run: |
-          sed -i "s|__WIKI_PASSWORD__|${WIKI_PASSWORD}|g"                 js/config.js
-          sed -i "s|__SUPABASE_URL__|${SUPABASE_URL}|g"                   js/config.js
-          sed -i "s|__SUPABASE_ANON_KEY__|${SUPABASE_ANON_KEY}|g"         js/config.js
-          sed -i "s|__EMAILJS_PUBLIC_KEY__|${EMAILJS_PUBLIC_KEY}|g"       js/config.js
-          sed -i "s|__EMAILJS_SERVICE_ID__|${EMAILJS_SERVICE_ID}|g"       js/config.js
-          sed -i "s|__EMAILJS_TEMPLATE_ID__|${EMAILJS_TEMPLATE_ID}|g"     js/config.js
-          sed -i "s|__EMAILJS_SHOP_TEMPLATE_ID__|${EMAILJS_SHOP_TEMPLATE_ID}|g" js/config.js
-          sed -i "s|__EMAILJS_RECIPIENT__|${EMAILJS_RECIPIENT}|g"         js/config.js
+          WIKI_PASSWORD:       ${{ secrets.WIKI_PASSWORD }}
+          SUPABASE_URL:        ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY:   ${{ secrets.SUPABASE_ANON_KEY }}
+          EMAILJS_PUBLIC_KEY:  ${{ secrets.EMAILJS_PUBLIC_KEY }}
+          EMAILJS_SERVICE_ID:  ${{ secrets.EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
+        run: node scripts/build-config.js
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
