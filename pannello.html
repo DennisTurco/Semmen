@@ -37,11 +37,18 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
+    .admin-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 2.5rem;
+    }
+
     .admin-table {
       width: 100%;
+      min-width: 640px;
       border-collapse: collapse;
       font-size: var(--text-sm);
-      margin-bottom: 2.5rem;
     }
 
     .admin-table th, .admin-table td {
@@ -116,6 +123,18 @@
       <p class="page-header__subtitle">Gestisci contenuti del sito e, se Admin, gli utenti registrati.</p>
     </div>
 
+    <!-- MODAL CONFERMA / AVVISO (sostituisce confirm()/alert() del browser) -->
+    <div class="modal-overlay hidden" id="confirm-modal">
+      <div class="modal-box">
+        <h2 class="pw-box__title" id="confirm-modal-title">Conferma</h2>
+        <p class="pw-box__subtitle" id="confirm-modal-message" style="margin-bottom:2rem;"></p>
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn btn--ghost" id="confirm-modal-cancel" style="flex:1;">Annulla</button>
+          <button type="button" class="btn btn--primary" id="confirm-modal-ok" style="flex:1;">Conferma</button>
+        </div>
+      </div>
+    </div>
+
     <div class="tabs" id="tabs">
       <button class="tab-btn active" data-tab="eventi" type="button">Eventi</button>
       <button class="tab-btn" data-tab="discepoli" type="button">Discepoli</button>
@@ -152,8 +171,11 @@
               <input type="text" id="evento-luogo" class="form-input">
             </div>
             <div class="form-group" style="grid-column:1/-1;">
-              <label class="form-label" for="evento-immagine">URL Immagine di Copertina</label>
-              <input type="text" id="evento-immagine" class="form-input" placeholder="img/eventi/nome-file.jpg">
+              <label class="form-label" for="evento-immagine-file">Immagine di Copertina</label>
+              <input type="file" id="evento-immagine-file" class="form-input" accept="image/*">
+              <p class="form-hint" id="evento-upload-status">Carica un file, oppure incolla un URL qui sotto.</p>
+              <input type="text" id="evento-immagine" class="form-input" placeholder="img/eventi/nome-file.jpg oppure URL" style="margin-top:0.5rem;">
+              <img id="evento-immagine-preview" class="hidden" style="max-width:220px;max-height:140px;object-fit:cover;border-radius:var(--radius-sm);margin-top:0.75rem;border:1px solid var(--border-gold);">
             </div>
             <div class="form-group" style="grid-column:1/-1;">
               <label class="form-label" for="evento-credito">Credito Immagine (facoltativo)</label>
@@ -172,12 +194,14 @@
         </form>
       </div>
 
-      <table class="admin-table" id="eventi-table">
-        <thead>
-          <tr><th>Titolo</th><th>Stato</th><th>Data</th><th>Candidati</th><th>Azioni</th></tr>
-        </thead>
-        <tbody id="eventi-tbody"></tbody>
-      </table>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="eventi-table">
+          <thead>
+            <tr><th>Titolo</th><th>Stato</th><th>Data</th><th>Candidati</th><th>Azioni</th></tr>
+          </thead>
+          <tbody id="eventi-tbody"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- ── DISCEPOLI ──────────────────────────────────────────── -->
@@ -215,12 +239,14 @@
         </form>
       </div>
 
-      <table class="admin-table" id="discepoli-table">
-        <thead>
-          <tr><th>Nome</th><th>Grado</th><th>Utente collegato</th><th>Nota</th><th>Azioni</th></tr>
-        </thead>
-        <tbody id="discepoli-tbody"></tbody>
-      </table>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="discepoli-table">
+          <thead>
+            <tr><th>Nome</th><th>Grado</th><th>Utente collegato</th><th>Nota</th><th>Azioni</th></tr>
+          </thead>
+          <tbody id="discepoli-tbody"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- ── GRADI ──────────────────────────────────────────────── -->
@@ -263,22 +289,26 @@
         </form>
       </div>
 
-      <table class="admin-table" id="gradi-table">
-        <thead>
-          <tr><th>Ordine</th><th>Grado</th><th>Descrizione</th><th>Azioni</th></tr>
-        </thead>
-        <tbody id="gradi-tbody"></tbody>
-      </table>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="gradi-table">
+          <thead>
+            <tr><th>Ordine</th><th>Grado</th><th>Descrizione</th><th>Azioni</th></tr>
+          </thead>
+          <tbody id="gradi-tbody"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- ── UTENTI (solo Admin) ────────────────────────────────── -->
     <section class="tab-panel" id="tab-utenti">
+      <div class="admin-table-wrap">
       <table class="admin-table" id="utenti-table">
         <thead>
           <tr><th>Nome</th><th>Username</th><th>Email</th><th>Ruolo</th><th>Grado</th><th>Registrato il</th><th></th></tr>
         </thead>
         <tbody id="utenti-tbody"></tbody>
       </table>
+      </div>
     </section>
 
   </div>

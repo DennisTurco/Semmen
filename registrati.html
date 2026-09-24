@@ -56,8 +56,8 @@
 
         <div class="form-group" style="text-align:left;">
           <label class="form-label" for="signup-username">Username <span class="required">*</span></label>
-          <input type="text" id="signup-username" name="username" class="form-input" placeholder="es. druido_prosciutto" pattern="[a-zA-Z0-9_.]{3,24}" required>
-          <p class="form-hint">3-24 caratteri: lettere, numeri, punto o underscore. Visibile agli altri membri.</p>
+          <input type="text" id="signup-username" name="username" class="form-input" placeholder="es. druido_prosciutto" pattern="[a-zA-Z0-9_.]{3,24}" required autocomplete="off">
+          <p class="form-hint" id="username-hint">3-24 caratteri: lettere, numeri, punto o underscore. Visibile agli altri membri.</p>
         </div>
 
         <div class="form-group" style="text-align:left;">
@@ -126,11 +126,59 @@
       form.querySelectorAll('input, button').forEach(el => el.disabled = true);
     }
 
+    /* ── Controllo disponibilità username in tempo reale ─────── */
+    const usernameInput = document.getElementById('signup-username');
+    const usernameHint  = document.getElementById('username-hint');
+    const usernameHintDefault = usernameHint.textContent;
+    let usernameCheckToken = 0;
+    let usernameDisponibile = null;
+
+    usernameInput.addEventListener('input', () => {
+      const value = usernameInput.value.trim();
+      usernameDisponibile = null;
+
+      if (!SemmenAuth.configured || !value) {
+        usernameHint.textContent = usernameHintDefault;
+        usernameHint.style.color = '';
+        return;
+      }
+      if (!/^[a-zA-Z0-9_.]{3,24}$/.test(value)) {
+        usernameHint.textContent = usernameHintDefault;
+        usernameHint.style.color = '';
+        return;
+      }
+
+      const myToken = ++usernameCheckToken;
+      usernameHint.textContent = 'Controllo disponibilità...';
+      usernameHint.style.color = '';
+
+      clearTimeout(usernameInput._debounce);
+      usernameInput._debounce = setTimeout(async () => {
+        const { data, error } = await SemmenAuth.db().rpc('username_disponibile', { check_username: value });
+        if (myToken !== usernameCheckToken) return; // l'utente ha già digitato altro
+
+        if (error) {
+          usernameHint.textContent = usernameHintDefault;
+          usernameHint.style.color = '';
+          return;
+        }
+        usernameDisponibile = data;
+        usernameHint.textContent = data ? '✓ Username disponibile' : '✗ Username già in uso';
+        usernameHint.style.color = data ? 'var(--gold)' : 'var(--crimson-bright)';
+      }, 450);
+    });
+
     form.addEventListener('submit', async e => {
       e.preventDefault();
       if (!SemmenAuth.configured) return;
 
       errorEl.textContent = '';
+
+      if (usernameDisponibile === false) {
+        errorEl.textContent = 'Scegli un username disponibile.';
+        return;
+      }
+
       submitBtn.disabled = true;
       submitText.textContent = 'Registrazione in corso...';
       submitSpinner.classList.remove('hidden');

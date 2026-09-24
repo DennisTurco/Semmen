@@ -9,6 +9,43 @@
   const sb = SemmenAuth.db();
   const isAdmin = profile.role === 'admin';
 
+  /* ── Modal conferma/avviso (sostituisce confirm()/alert()) ────── */
+  function showModal({ title, message, showCancel }) {
+    return new Promise(resolve => {
+      const overlay  = document.getElementById('confirm-modal');
+      const cancelBtn = document.getElementById('confirm-modal-cancel');
+      const okBtn     = document.getElementById('confirm-modal-ok');
+
+      document.getElementById('confirm-modal-title').textContent = title;
+      document.getElementById('confirm-modal-message').textContent = message;
+      cancelBtn.style.display = showCancel ? '' : 'none';
+      overlay.classList.remove('hidden');
+
+      function cleanup(result) {
+        overlay.classList.add('hidden');
+        okBtn.removeEventListener('click', onOk);
+        cancelBtn.removeEventListener('click', onCancel);
+        overlay.removeEventListener('click', onOverlay);
+        resolve(result);
+      }
+      function onOk() { cleanup(true); }
+      function onCancel() { cleanup(false); }
+      function onOverlay(e) { if (e.target === overlay) cleanup(false); }
+
+      okBtn.addEventListener('click', onOk);
+      cancelBtn.addEventListener('click', onCancel);
+      overlay.addEventListener('click', onOverlay);
+    });
+  }
+
+  function confirmDialog(message) {
+    return showModal({ title: 'Conferma', message, showCancel: true });
+  }
+
+  async function alertDialog(message) {
+    await showModal({ title: 'Attenzione', message, showCancel: false });
+  }
+
   /* ── Tabs ───────────────────────────────────────────────────── */
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
@@ -88,6 +125,48 @@
     });
   }
 
+  const eventoImmagineEl   = document.getElementById('evento-immagine');
+  const eventoImmagineFile = document.getElementById('evento-immagine-file');
+  const eventoUploadStatus = document.getElementById('evento-upload-status');
+  const eventoImmaginePreview = document.getElementById('evento-immagine-preview');
+  const UPLOAD_STATUS_DEFAULT = eventoUploadStatus.textContent;
+
+  function updateEventoPreview() {
+    const url = eventoImmagineEl.value.trim();
+    if (url) {
+      eventoImmaginePreview.src = url;
+      eventoImmaginePreview.classList.remove('hidden');
+    } else {
+      eventoImmaginePreview.classList.add('hidden');
+    }
+  }
+
+  eventoImmagineEl.addEventListener('input', updateEventoPreview);
+
+  eventoImmagineFile.addEventListener('change', async () => {
+    const file = eventoImmagineFile.files[0];
+    if (!file) return;
+
+    eventoUploadStatus.textContent = 'Caricamento in corso...';
+
+    const ext  = file.name.split('.').pop();
+    const path = `${crypto.randomUUID()}.${ext}`;
+
+    const { error: uploadError } = await SemmenAuth.client
+      .storage.from('eventi-immagini')
+      .upload(path, file, { upsert: false });
+
+    if (uploadError) {
+      eventoUploadStatus.textContent = `Errore upload: ${uploadError.message}`;
+      return;
+    }
+
+    const { data } = SemmenAuth.client.storage.from('eventi-immagini').getPublicUrl(path);
+    eventoImmagineEl.value = data.publicUrl;
+    updateEventoPreview();
+    eventoUploadStatus.textContent = '✓ Immagine caricata.';
+  });
+
   function editEvento(ev) {
     eventoIdEl.value = ev.id;
     document.getElementById('evento-titolo').value      = ev.titolo || '';
@@ -95,9 +174,11 @@
     document.getElementById('evento-data-testo').value    = ev.data_testo || '';
     document.getElementById('evento-durata').value        = ev.durata || '';
     document.getElementById('evento-luogo').value         = ev.luogo || '';
-    document.getElementById('evento-immagine').value      = ev.immagine || '';
+    eventoImmagineEl.value                                 = ev.immagine || '';
     document.getElementById('evento-credito').value       = ev.credito_immagine || '';
     document.getElementById('evento-descrizione').value   = ev.descrizione || '';
+    updateEventoPreview();
+    eventoUploadStatus.textContent = UPLOAD_STATUS_DEFAULT;
     eventoCancel.classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -107,14 +188,16 @@
     eventoIdEl.value = '';
     eventoCancel.classList.add('hidden');
     eventoError.textContent = '';
+    eventoUploadStatus.textContent = UPLOAD_STATUS_DEFAULT;
+    eventoImmaginePreview.classList.add('hidden');
   }
 
   eventoCancel.addEventListener('click', resetEventoForm);
 
   async function deleteEvento(id) {
-    if (!confirm('Eliminare questo evento? L\'azione è irreversibile.')) return;
+    if (!(await confirmDialog('Eliminare questo evento? L\'azione è irreversibile.'))) return;
     const { error } = await sb.from('eventi').delete().eq('id', id);
-    if (error) { alert(error.message); return; }
+    if (error) { await alertDialog(error.message); return; }
     loadEventi();
   }
 
@@ -219,9 +302,9 @@
   discepoloCancel.addEventListener('click', resetDiscepoloForm);
 
   async function deleteDiscepolo(id) {
-    if (!confirm('Eliminare questo discepolo?')) return;
+    if (!(await confirmDialog('Eliminare questo discepolo?'))) return;
     const { error } = await sb.from('discepoli').delete().eq('id', id);
-    if (error) { alert(error.message); return; }
+    if (error) { await alertDialog(error.message); return; }
     loadDiscepoli();
   }
 
@@ -306,9 +389,9 @@
   gradoCancel.addEventListener('click', resetGradoForm);
 
   async function deleteGrado(id) {
-    if (!confirm('Eliminare questo grado? Fallisce se è ancora usato da discepoli o utenti.')) return;
+    if (!(await confirmDialog('Eliminare questo grado? Fallisce se è ancora usato da discepoli o utenti.'))) return;
     const { error } = await sb.from('gradi').delete().eq('id', id);
-    if (error) { alert(error.message); return; }
+    if (error) { await alertDialog(error.message); return; }
     await refreshGradiOvunque();
   }
 
@@ -382,7 +465,7 @@
       select.addEventListener('change', async () => {
         const userId = select.dataset.roleFor;
         const { error } = await sb.rpc('admin_set_role', { target_user_id: userId, new_role: select.value });
-        if (error) { alert(error.message); return; }
+        if (error) { await alertDialog(error.message); return; }
         flashSaved(userId);
       });
     });
@@ -391,7 +474,7 @@
       select.addEventListener('change', async () => {
         const userId = select.dataset.gradoFor;
         const { error } = await sb.rpc('admin_set_grado', { target_user_id: userId, new_grado_id: select.value || null });
-        if (error) { alert(error.message); return; }
+        if (error) { await alertDialog(error.message); return; }
         flashSaved(userId);
       });
     });
