@@ -269,10 +269,21 @@
   </script>
   <script>
     // Statistiche con animazione scramble all'entrata in viewport
+    (async () => {
     const statsEl = document.getElementById('stats-strip');
     if (statsEl && CONFIG.stats) {
+      // "Membri" riflette il numero di Discepoli censiti (stessa fonte
+      // della pagina Discepoli), non un valore statico da config.js.
+      let membri = CONFIG.stats.members;
+      if (SemmenAuth.configured) {
+        const { count, error } = await SemmenAuth.db()
+          .from('discepoli')
+          .select('*', { count: 'exact', head: true });
+        if (!error && count) membri = String(count);
+      }
+
       const statData = [
-        { label: 'Membri',          value: CONFIG.stats.members  },
+        { label: 'Membri',          value: membri },
         { label: 'Meme Catalogati', value: CONFIG.stats.memes    },
         { label: 'Eresie Soppresse',value: CONFIG.stats.heresies },
         { label: 'Anni di Attività',value: CONFIG.stats.years    },
@@ -317,6 +328,7 @@
 
       obs.observe(statsEl);
     }
+    })();
   </script>
 </body>
 </html>

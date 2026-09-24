@@ -118,7 +118,7 @@
     </div>
   </nav>
 
-  <div class="container" style="padding-top:3rem;padding-bottom:6rem;">
+  <div class="container" id="page-main" style="padding-top:3rem;padding-bottom:6rem;">
 
     <div class="page-header">
       <p class="page-header__label">Ordine Arcano — Organico Ufficiale</p>
@@ -206,6 +206,10 @@
     }
 
     (async function init() {
+      // Elenco visibile solo a Compagno/Editor/Admin.
+      const profile = await SemmenAuth.requireRole(['admin', 'editor', 'compagno']);
+      if (!profile) return;
+
       if (SemmenAuth.configured) {
         const { data, error } = await SemmenAuth.db()
           .from('discepoli')

@@ -43,7 +43,7 @@ const SemmenAuth = (function () {
 
     const { data, error } = await db()
       .from('profiles')
-      .select('id, email, full_name, role, created_at')
+      .select('id, email, full_name, username, role, grado_id, created_at')
       .eq('id', session.user.id)
       .single();
 
@@ -83,7 +83,7 @@ const SemmenAuth = (function () {
     // qui appena vede una sessione valida, creando un loop infinito.
     const session = await getSession();
     if (!session) {
-      location.href = `login.html?redirect=${encodeURIComponent(location.pathname.split('/').pop())}`;
+      location.href = `login.html?redirect=${encodeURIComponent(location.pathname.split('/').pop() + location.search + location.hash)}`;
       return null;
     }
 
@@ -148,6 +148,7 @@ const SemmenAuth = (function () {
     // Un solo elemento in navbar (menu a tendina) invece di tre voci
     // separate, per non affollare la barra.
     const canPannello = profile.role === 'admin' || profile.role === 'editor';
+    const canAttivita = profile.role !== 'utente';
     slot.innerHTML = `
       <div class="navbar__account" id="navbar-account">
         <button type="button" class="navbar__auth-link navbar__account-trigger" id="navbar-account-trigger" aria-expanded="false">
@@ -156,6 +157,7 @@ const SemmenAuth = (function () {
         </button>
         <div class="navbar__account-menu">
           ${canPannello ? `<a href="pannello.html">Pannello</a>` : ''}
+          ${canAttivita ? `<a href="attivita.html">Attività</a>` : ''}
           <a href="account.html">Account</a>
           <button type="button" id="navbar-logout">Esci</button>
         </div>

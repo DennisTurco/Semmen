@@ -287,6 +287,7 @@ create table if not exists semmen.eventi (
   credito_immagine text,
   stato            text not null default 'In programma'
                      check (stato in ('In programma', 'Imminente', 'Passato')),
+  organizzatore_id uuid references semmen.profiles (id) on delete set null,
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now()
 );
@@ -319,11 +320,13 @@ create table if not exists semmen.discepoli (
 );
 
 alter table semmen.discepoli enable row level security;
-grant select, insert, update, delete on semmen.discepoli to anon, authenticated;
+grant select, insert, update, delete on semmen.discepoli to authenticated;
 
+-- Elenco visibile solo a Compagno/Editor/Admin (pagina discepoli.html
+-- riservata, non più pubblica).
 drop policy if exists discepoli_select_all on semmen.discepoli;
 create policy discepoli_select_all on semmen.discepoli
-  for select using (true);
+  for select using (semmen.is_compagno_or_above());
 
 drop policy if exists discepoli_write_editor on semmen.discepoli;
 create policy discepoli_write_editor on semmen.discepoli
@@ -358,6 +361,100 @@ create policy partecipazioni_insert on semmen.event_partecipazioni
 drop policy if exists partecipazioni_delete on semmen.event_partecipazioni;
 create policy partecipazioni_delete on semmen.event_partecipazioni
   for delete using (auth.uid() = user_id or semmen.is_editor_or_admin());
+
+-- Elenco partecipanti di un evento (nome visualizzato + grado), leggibile
+-- da Compagno/Editor/Admin nella pagina di dettaglio evento, senza
+-- esporre l'intera tabella profiles (RLS di profiles resta "solo proprio
+-- profilo o admin"). SECURITY DEFINER sul modello di directory_utenti().
+create or replace function semmen.evento_partecipanti(p_evento_id uuid)
+returns table (
+  id             uuid,
+  user_id        uuid,
+  display_name   text,
+  grado_nome     text,
+  grado_simbolo  text,
+  note           text,
+  created_at     timestamptz
+)
+language plpgsql security definer set search_path = semmen, public as $$
+begin
+  if not semmen.is_compagno_or_above() then
+    raise exception 'Permesso negato';
+  end if;
+
+  return query
+    select
+      ep.id,
+      ep.user_id,
+      coalesce(p.username, p.full_name, p.email),
+      g.nome,
+      g.simbolo,
+      ep.note,
+      ep.created_at
+    from semmen.event_partecipazioni ep
+    left join semmen.profiles p on p.id = ep.user_id
+    left join semmen.gradi g on g.id = p.grado_id
+    where ep.evento_id = p_evento_id
+    order by ep.created_at asc;
+end;
+$$;
+
+revoke all on function semmen.evento_partecipanti(uuid) from public;
+grant execute on function semmen.evento_partecipanti(uuid) to authenticated;
+
+-- Directory utenti leggibile da Compagno+ (non solo Editor/Admin): solo
+-- id + nome visualizzato, mai email/ruolo. Usata per risolvere il nome
+-- dell'organizzatore evento e per l'assegnazione delle Attività.
+create or replace function semmen.utenti_assegnabili()
+returns table (id uuid, display_name text)
+language plpgsql security definer stable set search_path = semmen, public as $$
+begin
+  if not semmen.is_compagno_or_above() then
+    raise exception 'Permesso negato';
+  end if;
+  return query
+    select p.id, coalesce(p.username, p.full_name, p.email)
+    from semmen.profiles p
+    order by 2;
+end;
+$$;
+
+revoke all on function semmen.utenti_assegnabili() from public;
+grant execute on function semmen.utenti_assegnabili() to authenticated;
+
+-- ============================================================
+-- TABELLA ATTIVITA (bacheca kanban semplificata Compagno+)
+-- ============================================================
+create table if not exists semmen.attivita (
+  id          uuid primary key default gen_random_uuid(),
+  titolo      text not null,
+  descrizione text,
+  stato       text not null default 'da_fare'
+                check (stato in ('da_fare', 'in_corso', 'completato')),
+  assegnato_a uuid references semmen.profiles (id) on delete set null,
+  creato_da   uuid references semmen.profiles (id) on delete set null,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+alter table semmen.attivita enable row level security;
+grant select, insert, update, delete on semmen.attivita to authenticated;
+
+drop policy if exists attivita_select on semmen.attivita;
+create policy attivita_select on semmen.attivita
+  for select using (semmen.is_compagno_or_above());
+
+drop policy if exists attivita_insert on semmen.attivita;
+create policy attivita_insert on semmen.attivita
+  for insert with check (semmen.is_compagno_or_above() and creato_da = auth.uid());
+
+drop policy if exists attivita_update on semmen.attivita;
+create policy attivita_update on semmen.attivita
+  for update using (semmen.is_compagno_or_above()) with check (semmen.is_compagno_or_above());
+
+drop policy if exists attivita_delete on semmen.attivita;
+create policy attivita_delete on semmen.attivita
+  for delete using (creato_da = auth.uid() or semmen.is_editor_or_admin());
 
 -- ============================================================
 -- STORAGE: bucket pubblico per le immagini di copertina eventi

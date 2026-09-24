@@ -202,7 +202,7 @@
                   ${ev ? (ev.data_testo || ev.data || '') : ''} · ${stato}
                 </p>
               </div>
-              <button type="button" class="btn btn--ghost" style="font-size:0.7rem;padding:0.4rem 0.7rem;" data-ritira="${p.id}">Ritira</button>
+              ${stato !== 'Passato' ? `<button type="button" class="btn btn--ghost" style="font-size:0.7rem;padding:0.4rem 0.7rem;" data-ritira="${p.id}">Ritira</button>` : ''}
             </div>`;
         }).join('');
 

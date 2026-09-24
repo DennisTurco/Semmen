@@ -117,6 +117,9 @@ function render() {
         data-action="${btn.action || ''}"
         ${btn.disabled ? 'disabled' : ''}
       >${btn.label}</button>
+      ${eventiFromDb && currentProfile && currentProfile.role !== 'utente'
+        ? `<a href="dettaglio-evento.html#${ev.id}" class="btn btn--outline" style="width:100%;margin-top:0.5rem;">Vedi Partecipanti</a>`
+        : ''}
     </div>`;
   }).join('');
 

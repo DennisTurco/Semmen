@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Attività — La Setta del Semmen</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .entry-form {
+      border: 1px dashed var(--border-gold);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .entry-form__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 700px) {
+      .entry-form__grid { grid-template-columns: 1fr; }
+    }
+
+    .kanban {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .kanban { grid-template-columns: 1fr; }
+    }
+
+    .kanban-col {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      min-height: 100px;
+    }
+
+    .kanban-col__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border-gold);
+    }
+
+    .kanban-col__count { color: var(--gold); }
+
+    .attivita-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-gold);
+      border-left: 3px solid var(--gold-dim);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .attivita-card__titolo {
+      font-family: var(--font-ui);
+      color: var(--text-primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .attivita-card__desc {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 0.6rem;
+      white-space: pre-wrap;
+    }
+
+    .attivita-card__meta {
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      margin-bottom: 0.7rem;
+      line-height: 1.5;
+    }
+
+    .attivita-card__actions {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .attivita-card__actions select {
+      font-size: 0.7rem;
+      padding: 0.3rem 0.4rem;
+      font-family: var(--font-ui);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    .attivita-card__actions .btn {
+      font-size: 0.65rem;
+      padding: 0.3rem 0.6rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <div class="navbar__logo seal-container"></div>
+        La Setta del Semmen
+      </a>
+      <button class="navbar__burger" id="navbar-burger" aria-label="Apri menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="navbar__menu" id="navbar-menu">
+        <ul class="navbar__nav">
+          <li><a href="index.html">Sanctuarium</a></li>
+          <li><a href="wiki.html">Archivio</a></li>
+          <li><a href="discepoli.html">Discepoli</a></li>
+          <li><a href="eventi.html">Eventi</a></li>
+          <li><a href="candidatura.html">Candidati</a></li>
+          <li><a href="shop.html">Shop</a></li>
+        </ul>
+        <div class="navbar__auth" id="navbar-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" id="page-main" style="padding-top:3rem;padding-bottom:6rem;">
+
+    <div class="page-header">
+      <p class="page-header__label">Sala del Consiglio</p>
+      <h1 class="page-header__title">Attività</h1>
+      <p class="page-header__subtitle">Bacheca condivisa per dividersi il lavoro, tecnico e non, dell'Ordine.</p>
+    </div>
+
+    <div class="entry-form">
+      <h3 style="margin-bottom:1rem;" id="attivita-form-title">Nuova Attività</h3>
+      <form id="attivita-form">
+        <input type="hidden" id="attivita-id" value="">
+        <div class="entry-form__grid">
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label" for="attivita-titolo">Titolo <span class="required">*</span></label>
+            <input type="text" id="attivita-titolo" class="form-input" required>
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label" for="attivita-descrizione">Descrizione</label>
+            <textarea id="attivita-descrizione" class="form-textarea" rows="3" placeholder="Dettagli, link, note..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="attivita-assegnato">Assegnata a</label>
+            <select id="attivita-assegnato" class="form-input">
+              <option value="">— Nessuno —</option>
+            </select>
+          </div>
+        </div>
+        <p class="pw-box__error" id="attivita-error"></p>
+        <div style="display:flex;gap:0.75rem;">
+          <button type="submit" class="btn btn--primary" id="attivita-submit-btn">Crea Attività</button>
+          <button type="button" class="btn btn--ghost hidden" id="attivita-cancel-btn">Annulla Modifica</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="kanban">
+      <div class="kanban-col">
+        <div class="kanban-col__header"><span>Da Fare</span><span class="kanban-col__count" id="count-da_fare">0</span></div>
+        <div id="col-da_fare"></div>
+      </div>
+      <div class="kanban-col">
+        <div class="kanban-col__header"><span>In Corso</span><span class="kanban-col__count" id="count-in_corso">0</span></div>
+        <div id="col-in_corso"></div>
+      </div>
+      <div class="kanban-col">
+        <div class="kanban-col__header"><span>Completato</span><span class="kanban-col__count" id="count-completato">0</span></div>
+        <div id="col-completato"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo seal-container"></div>
+        <span class="footer__name">La Setta del Semmen</span>
+      </div>
+      <div class="footer__legal">
+        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        Tutti i meme sono riservati. Riproduzione vietata.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/attivita.js"></script>
+</body>
+</html>

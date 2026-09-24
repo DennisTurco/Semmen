@@ -96,6 +96,12 @@
   const eventoCancel = document.getElementById('evento-cancel-btn');
   const eventiTbody  = document.getElementById('eventi-tbody');
 
+  function organizzatoreLabel(id) {
+    if (!id) return '—';
+    const u = directory.find(x => x.id === id);
+    return u ? u.display_name : '—';
+  }
+
   async function loadEventi() {
     const { data: eventi, error } = await sb.from('eventi').select('*').order('data', { ascending: false });
     if (error) { eventoError.textContent = error.message; return; }
@@ -109,13 +115,14 @@
         <td>${ev.titolo}</td>
         <td>${calcolaStatoEvento(ev.data)}</td>
         <td>${ev.data_testo || ev.data || '—'}</td>
-        <td>${counts[ev.id] || 0}</td>
+        <td>${organizzatoreLabel(ev.organizzatore_id)}</td>
+        <td><a href="dettaglio-evento.html#${ev.id}">${counts[ev.id] || 0}</a></td>
         <td class="row-actions">
           <button type="button" class="btn btn--outline" data-edit="${ev.id}">Modifica</button>
           <button type="button" class="btn btn--ghost" data-delete="${ev.id}">Elimina</button>
         </td>
       </tr>
-    `).join('') || `<tr><td colspan="5">Nessun evento. Aggiungine uno dal modulo qui sopra.</td></tr>`;
+    `).join('') || `<tr><td colspan="6">Nessun evento. Aggiungine uno dal modulo qui sopra.</td></tr>`;
 
     eventiTbody.querySelectorAll('[data-edit]').forEach(btn => {
       btn.addEventListener('click', () => editEvento(eventi.find(e => e.id === btn.dataset.edit)));
@@ -221,7 +228,7 @@
     const id = eventoIdEl.value;
     const { error } = id
       ? await sb.from('eventi').update(payload).eq('id', id)
-      : await sb.from('eventi').insert(payload);
+      : await sb.from('eventi').insert({ ...payload, organizzatore_id: profile.id });
 
     if (error) { eventoError.textContent = error.message; return; }
     resetEventoForm();

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Dettaglio Evento — La Setta del Semmen</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <div class="navbar__logo seal-container"></div>
+        La Setta del Semmen
+      </a>
+      <button class="navbar__burger" id="navbar-burger" aria-label="Apri menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="navbar__menu" id="navbar-menu">
+        <ul class="navbar__nav">
+          <li><a href="index.html">Sanctuarium</a></li>
+          <li><a href="wiki.html">Archivio</a></li>
+          <li><a href="discepoli.html">Discepoli</a></li>
+          <li><a href="eventi.html">Eventi</a></li>
+          <li><a href="candidatura.html">Candidati</a></li>
+          <li><a href="shop.html">Shop</a></li>
+        </ul>
+        <div class="navbar__auth" id="navbar-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" id="page-main" style="padding-top:3rem;padding-bottom:6rem;max-width:720px;">
+
+    <div class="page-header">
+      <p class="page-header__label"><a href="eventi.html">← Eventi</a></p>
+      <h1 class="page-header__title" id="evento-titolo">Dettaglio Evento</h1>
+      <p class="page-header__subtitle" id="evento-meta"></p>
+    </div>
+
+    <div class="card" style="margin-top:2rem;">
+      <div class="card__body">
+        <h3 style="font-size:1.1rem;margin-bottom:1rem;">Utenti che hanno Aderito</h3>
+        <div id="partecipanti-list">
+          <p style="color:var(--text-muted);font-size:0.85rem;">Caricamento...</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo seal-container"></div>
+        <span class="footer__name">La Setta del Semmen</span>
+      </div>
+      <div class="footer__legal">
+        © Anno Domini MMXXIV · La Setta del Semmen<br>
+        Tutti i meme sono riservati. Riproduzione vietata.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/dettaglio-evento.js"></script>
+</body>
+</html>
