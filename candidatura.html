@@ -120,22 +120,7 @@
                 </p>
               </div>
               <div class="card__body">
-                <div class="form-grid-2">
-                  <div class="form-group">
-                    <label class="form-label" for="nome">Nome <span class="required">*</span></label>
-                    <input type="text" id="nome" name="nome" class="form-input" placeholder="Il tuo nome" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="cognome">Cognome <span class="required">*</span></label>
-                    <input type="text" id="cognome" name="cognome" class="form-input" placeholder="Il tuo cognome" required>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label" for="email">Email <span class="required">*</span></label>
-                  <input type="email" id="email" name="email" class="form-input" placeholder="tua@email.com" required>
-                  <p class="form-hint">Useremo questa email per comunicazioni ufficiali della Setta.</p>
-                </div>
+                <p class="form-hint hidden" id="candidato-identita" style="margin-bottom:1.25rem;"></p>
 
                 <div class="form-group">
                   <label class="form-label" for="telefono">numero telefono <span class="required">*</span></label>
@@ -587,7 +572,12 @@
         gateAction.textContent   = 'Vai al tuo Account';
         gateAction.href          = 'account.html';
       } else {
-        return; // grado "utente": può candidarsi, form visibile normalmente
+        // grado "utente": può candidarsi. Nome ed email li prendiamo
+        // dal profilo, quindi il form non li chiede.
+        const identita = document.getElementById('candidato-identita');
+        identita.textContent = `Ti candidi come ${profile.full_name || profile.username} (${profile.email}).`;
+        identita.classList.remove('hidden');
+        return;
       }
 
       formContainer.classList.add('hidden');

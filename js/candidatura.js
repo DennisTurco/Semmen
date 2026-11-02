@@ -105,8 +105,12 @@ form.addEventListener('submit', async e => {
   e.preventDefault();
   if (!validateStep(currentStep)) return;
 
-  // Raccogli dati
+  // Raccogli dati: nome ed email arrivano dal profilo dell'utente loggato
   const data = collectFormData();
+  const profile = (typeof SemmenAuth !== 'undefined') ? await SemmenAuth.getProfile() : null;
+  data.nome     = profile?.full_name || profile?.username || 'N/D';
+  data.username = profile?.username  || 'N/D';
+  data.email    = profile?.email     || 'N/D';
 
   // Stato loading
   submitBtn.disabled = true;
@@ -127,10 +131,11 @@ form.addEventListener('submit', async e => {
 
     await emailjs.send(CONFIG.email.serviceId, CONFIG.email.templateId, {
       to_email:        CONFIG.email.recipient,
-      subject:         `${CONFIG.email.subjectPrefix} ${data.nome} ${data.cognome}`,
+      subject:         `${CONFIG.email.subjectPrefix} ${data.nome}`,
       message:
         `Nuova candidatura alla Setta\n\n` +
-        `Nome: ${data.nome} ${data.cognome}\n` +
+        `Nome: ${data.nome}\n` +
+        `Username: ${data.username}\n` +
         `Email: ${data.email}\n` +
         `Telefono: ${data.telefono}\n` +
         `Discord: ${data.discord || 'N/D'}\n` +
@@ -146,7 +151,7 @@ form.addEventListener('submit', async e => {
 
       // Dati candidato
       nome:            data.nome,
-      cognome:         data.cognome,
+      username:        data.username,
       email:           data.email,
       telefono:        data.telefono,
       discord:         data.discord || 'N/D',

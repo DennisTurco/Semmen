@@ -18,6 +18,13 @@
 
 `js/config.js` è generato e non è tracciato da git — va rilanciato lo script ogni volta che cambi `.env.local` o `js/config.template.js`.
 
+## Supabase Auth — URL di redirect
+
+I link nelle email (conferma registrazione, reset password) puntano all'URL da cui l'utente ha fatto la richiesta (`location.origin`), ma Supabase li accetta solo se sono nella sua lista; altrimenti ripiega sulla **Site URL**. In Supabase → Authentication → URL Configuration:
+
+- **Site URL**: l'URL di produzione (es. `https://<utente>.github.io/Semmen/`), non `http://localhost:3000`.
+- **Redirect URLs**: aggiungi `https://<dominio-produzione>/**` e, per lo sviluppo, `http://localhost:3000/**`.
+
 ## Ruoli utente
 
 Il `role` (tabella `semmen.profiles`) determina i **permessi**. È diverso dal **Grado** (Adepto, Arconte, ecc.), che è solo narrativo/di visualizzazione e non dà accesso a nulla — lo assegna l'Admin dal Pannello ed è usato solo per la pagina wiki "Gerarchia Interna" e per i Discepoli.
