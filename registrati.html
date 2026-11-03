@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
-  <title>Registrati — La Setta del Semmen</title>
+  <title>Registrati | La Setta del Semmen</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -43,6 +43,9 @@
         Per diventare Compagno della Setta serve prima
         <a href="candidatura.html">candidarsi</a> e superare il Rito.
       </p>
+
+      <!-- Mostrato se si arriva da un link di invito (registrati.html?invito=username) -->
+      <div id="invito-banner" class="alert alert--info hidden" style="text-align:left;margin-bottom:1.5rem;"></div>
 
       <div id="config-warning" class="alert alert--error hidden" style="text-align:left;margin-bottom:1.5rem;">
         Supabase non è ancora configurato per questo sito (<code>js/config.js</code>).
@@ -126,6 +129,23 @@
       form.querySelectorAll('input, button').forEach(el => el.disabled = true);
     }
 
+    /* ── Link di invito ─────────────────────────────────────────
+       Lo username di chi invita viaggia nei metadati della
+       registrazione: è il trigger handle_new_user a collegarlo al
+       profilo, ignorandolo se non corrisponde a nessun utente. */
+    let invitante = new URLSearchParams(location.search).get('invito');
+    if (invitante && !/^[a-zA-Z0-9_.]{3,24}$/.test(invitante)) invitante = null;
+
+    if (invitante && SemmenAuth.configured) {
+      // username_disponibile = false vuol dire che lo username esiste
+      SemmenAuth.db().rpc('username_disponibile', { check_username: invitante }).then(({ data, error }) => {
+        if (error || data !== false) { invitante = null; return; }
+        const banner = document.getElementById('invito-banner');
+        banner.textContent = `Sei stato invitato da ${invitante}. Benvenuto alle porte dell'Ordine.`;
+        banner.classList.remove('hidden');
+      });
+    }
+
     /* ── Controllo disponibilità username in tempo reale ─────── */
     const usernameInput = document.getElementById('signup-username');
     const usernameHint  = document.getElementById('username-hint');
@@ -191,7 +211,7 @@
       const { error } = await SemmenAuth.client.auth.signUp({
         email, password,
         options: {
-          data: { full_name: nome, username },
+          data: { full_name: nome, username, ...(invitante ? { invitato_da: invitante } : {}) },
           emailRedirectTo: `${location.origin}${location.pathname.replace(/registrati\.html$/, 'login.html')}`,
         },
       });

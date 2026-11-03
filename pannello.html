@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
-  <title>Pannello — La Setta del Semmen</title>
+  <title>Pannello | La Setta del Semmen</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
   <style>
     .tabs {
@@ -15,6 +16,8 @@
       border-bottom: 1px solid var(--border-gold);
       margin: 2rem 0 2rem;
     }
+
+    .tab-btn i { margin-right: 0.45rem; }
 
     .tab-btn {
       padding: 0.6rem 1.2rem;
@@ -71,7 +74,10 @@
 
     .admin-table select { min-width: 140px; }
 
-    .row-actions { display: flex; gap: 0.5rem; }
+    /* La cella resta una vera cella di tabella (niente display:flex),
+       così il bordo inferiore segue l'altezza della riga */
+    .row-actions { white-space: nowrap; }
+    .row-actions .btn + .btn { margin-left: 0.5rem; }
     .row-actions .btn { padding: 0.3rem 0.7rem; font-size: 0.7rem; }
 
     .entry-form {
@@ -132,23 +138,24 @@
         <h2 class="pw-box__title" id="confirm-modal-title">Conferma</h2>
         <p class="pw-box__subtitle" id="confirm-modal-message" style="margin-bottom:2rem;"></p>
         <div style="display:flex;gap:0.75rem;">
-          <button type="button" class="btn btn--ghost" id="confirm-modal-cancel" style="flex:1;">Annulla</button>
-          <button type="button" class="btn btn--primary" id="confirm-modal-ok" style="flex:1;">Conferma</button>
+          <button type="button" class="btn btn--ghost" id="confirm-modal-cancel" style="flex:1;"><i class="fa-solid fa-xmark" aria-hidden="true"></i>Annulla</button>
+          <button type="button" class="btn btn--primary" id="confirm-modal-ok" style="flex:1;"><i class="fa-solid fa-check" aria-hidden="true"></i>Conferma</button>
         </div>
       </div>
     </div>
 
     <div class="tabs" id="tabs">
-      <button class="tab-btn active" data-tab="eventi" type="button">Eventi</button>
-      <button class="tab-btn" data-tab="discepoli" type="button">Discepoli</button>
-      <button class="tab-btn" data-tab="gradi" type="button">Gradi</button>
-      <button class="tab-btn hidden" data-tab="utenti" id="tab-btn-utenti" type="button">Utenti</button>
+      <button class="tab-btn active" data-tab="eventi" type="button"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>Eventi</button>
+      <button class="tab-btn" data-tab="discepoli" type="button"><i class="fa-solid fa-users" aria-hidden="true"></i>Discepoli</button>
+      <button class="tab-btn" data-tab="gradi" type="button"><i class="fa-solid fa-ranking-star" aria-hidden="true"></i>Gradi</button>
+      <button class="tab-btn" data-tab="prodotti" type="button"><i class="fa-solid fa-store" aria-hidden="true"></i>Prodotti</button>
+      <button class="tab-btn hidden" data-tab="utenti" id="tab-btn-utenti" type="button"><i class="fa-solid fa-user-shield" aria-hidden="true"></i>Utenti</button>
     </div>
 
     <!-- ── EVENTI ─────────────────────────────────────────────── -->
     <section class="tab-panel active" id="tab-eventi">
-      <div class="entry-form">
-        <h3 style="margin-bottom:1rem;">Nuovo Evento</h3>
+      <details class="entry-form entry-form--toggle">
+        <summary><h3><i class="fa-solid fa-plus" aria-hidden="true"></i>Nuovo Evento</h3></summary>
         <form id="evento-form">
           <input type="hidden" id="evento-id" value="">
           <div class="entry-form__grid">
@@ -191,11 +198,11 @@
           </div>
           <p class="pw-box__error" id="evento-error"></p>
           <div style="display:flex;gap:0.75rem;">
-            <button type="submit" class="btn btn--primary" id="evento-submit-btn">Salva Evento</button>
-            <button type="button" class="btn btn--ghost hidden" id="evento-cancel-btn">Annulla Modifica</button>
+            <button type="submit" class="btn btn--primary" id="evento-submit-btn"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>Salva Evento</button>
+            <button type="button" class="btn btn--ghost hidden" id="evento-cancel-btn"><i class="fa-solid fa-xmark" aria-hidden="true"></i>Annulla Modifica</button>
           </div>
         </form>
-      </div>
+      </details>
 
       <div class="admin-table-wrap">
         <table class="admin-table" id="eventi-table">
@@ -207,10 +214,74 @@
       </div>
     </section>
 
+    <!-- ── PRODOTTI (catalogo dello Shop) ─────────────────────── -->
+    <section class="tab-panel" id="tab-prodotti">
+      <details class="entry-form entry-form--toggle">
+        <summary><h3><i class="fa-solid fa-plus" aria-hidden="true"></i><span id="prodotto-form-title">Nuovo Prodotto</span></h3></summary>
+        <form id="prodotto-form">
+          <input type="hidden" id="prodotto-id" value="">
+          <div class="entry-form__grid">
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="prodotto-nome">Nome <span class="required">*</span></label>
+              <input type="text" id="prodotto-nome" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prodotto-prezzo">Prezzo</label>
+              <input type="text" id="prodotto-prezzo" class="form-input" placeholder="es. 4€ oppure TBD">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prodotto-ordine">Ordine nel catalogo</label>
+              <input type="number" id="prodotto-ordine" class="form-input" step="10" value="0">
+              <p class="form-hint">I numeri più bassi vengono mostrati per primi.</p>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="prodotto-immagine-file">Immagine</label>
+              <input type="file" id="prodotto-immagine-file" class="form-input" accept="image/*">
+              <p class="form-hint" id="prodotto-upload-status">Carica un file, oppure incolla un URL qui sotto.</p>
+              <input type="text" id="prodotto-immagine" class="form-input" placeholder="img/shop/nome-file.jpg oppure URL" style="margin-top:0.5rem;">
+              <img id="prodotto-immagine-preview" class="hidden" alt="" style="max-width:220px;max-height:140px;object-fit:cover;border-radius:var(--radius-sm);margin-top:0.75rem;border:1px solid var(--border-gold);">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prodotto-icona">Icona (se non c'è l'immagine)</label>
+              <input type="text" id="prodotto-icona" class="form-input" placeholder="es. 📿">
+            </div>
+            <div class="form-group" style="align-self:end;">
+              <label class="form-checkbox">
+                <input type="checkbox" id="prodotto-disponibile" checked>
+                <span class="form-checkbox__label">Disponibile (si può richiedere l'acquisto)</span>
+              </label>
+              <label class="form-checkbox" style="margin-top:0.75rem;">
+                <input type="checkbox" id="prodotto-riservato">
+                <span class="form-checkbox__label">Riservato alla Setta: visibile solo dal grado di Compagno in su, agli altri appare censurato</span>
+              </label>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="prodotto-descrizione">Descrizione</label>
+              <textarea id="prodotto-descrizione" class="form-textarea" rows="3"></textarea>
+            </div>
+          </div>
+          <p class="pw-box__error" id="prodotto-error"></p>
+          <div style="display:flex;gap:0.75rem;">
+            <button type="submit" class="btn btn--primary" id="prodotto-submit-btn"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>Salva Prodotto</button>
+            <button type="button" class="btn btn--ghost hidden" id="prodotto-cancel-btn"><i class="fa-solid fa-xmark" aria-hidden="true"></i>Annulla Modifica</button>
+          </div>
+        </form>
+      </details>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="prodotti-table">
+          <thead>
+            <tr><th>Ordine</th><th>Prodotto</th><th>Prezzo</th><th>Disponibile</th><th>Riservato</th><th>Azioni</th></tr>
+          </thead>
+          <tbody id="prodotti-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- ── DISCEPOLI ──────────────────────────────────────────── -->
     <section class="tab-panel" id="tab-discepoli">
-      <div class="entry-form">
-        <h3 style="margin-bottom:1rem;">Nuovo Discepolo</h3>
+      <details class="entry-form entry-form--toggle">
+        <summary><h3><i class="fa-solid fa-plus" aria-hidden="true"></i>Nuovo Discepolo</h3></summary>
         <form id="discepolo-form">
           <input type="hidden" id="discepolo-id" value="">
           <div class="entry-form__grid">
@@ -236,11 +307,11 @@
           </div>
           <p class="pw-box__error" id="discepolo-error"></p>
           <div style="display:flex;gap:0.75rem;">
-            <button type="submit" class="btn btn--primary" id="discepolo-submit-btn">Salva Discepolo</button>
-            <button type="button" class="btn btn--ghost hidden" id="discepolo-cancel-btn">Annulla Modifica</button>
+            <button type="submit" class="btn btn--primary" id="discepolo-submit-btn"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>Salva Discepolo</button>
+            <button type="button" class="btn btn--ghost hidden" id="discepolo-cancel-btn"><i class="fa-solid fa-xmark" aria-hidden="true"></i>Annulla Modifica</button>
           </div>
         </form>
-      </div>
+      </details>
 
       <div class="admin-table-wrap">
         <table class="admin-table" id="discepoli-table">
@@ -254,8 +325,8 @@
 
     <!-- ── GRADI ──────────────────────────────────────────────── -->
     <section class="tab-panel" id="tab-gradi">
-      <div class="entry-form">
-        <h3 style="margin-bottom:1rem;">Nuovo Grado</h3>
+      <details class="entry-form entry-form--toggle">
+        <summary><h3><i class="fa-solid fa-plus" aria-hidden="true"></i>Nuovo Grado</h3></summary>
         <p style="color:var(--text-muted);font-size:0.82rem;margin:-0.5rem 0 1rem;">
           I gradi popolano sia la pagina wiki "Gerarchia Interna" sia il raggruppamento
           dei Discepoli. L'ordine determina la posizione nella gerarchia (0 = più alto).
@@ -276,6 +347,11 @@
               <input type="number" id="grado-ordine" class="form-input" value="0">
             </div>
             <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="grado-punti">Punti per ottenerlo (facoltativo)</label>
+              <input type="number" id="grado-punti" class="form-input" min="0" step="10" placeholder="Vuoto = grado assegnato solo a mano">
+              <p class="form-hint">Chi raggiunge questi punti compare tra le promozioni proposte (tab Utenti). Lascia vuoto per i gradi che non si guadagnano, come Fondatore o Grande Anziano.</p>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
               <label class="form-label" for="grado-descrizione">Descrizione</label>
               <textarea id="grado-descrizione" class="form-textarea" rows="3" placeholder="Mostrata nella pagina wiki Gerarchia Interna"></textarea>
             </div>
@@ -286,16 +362,16 @@
           </div>
           <p class="pw-box__error" id="grado-error"></p>
           <div style="display:flex;gap:0.75rem;">
-            <button type="submit" class="btn btn--primary" id="grado-submit-btn">Salva Grado</button>
-            <button type="button" class="btn btn--ghost hidden" id="grado-cancel-btn">Annulla Modifica</button>
+            <button type="submit" class="btn btn--primary" id="grado-submit-btn"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>Salva Grado</button>
+            <button type="button" class="btn btn--ghost hidden" id="grado-cancel-btn"><i class="fa-solid fa-xmark" aria-hidden="true"></i>Annulla Modifica</button>
           </div>
         </form>
-      </div>
+      </details>
 
       <div class="admin-table-wrap">
         <table class="admin-table" id="gradi-table">
           <thead>
-            <tr><th>Ordine</th><th>Grado</th><th>Descrizione</th><th>Azioni</th></tr>
+            <tr><th>Ordine</th><th>Grado</th><th>Punti</th><th>Descrizione</th><th>Azioni</th></tr>
           </thead>
           <tbody id="gradi-tbody"></tbody>
         </table>
@@ -304,10 +380,18 @@
 
     <!-- ── UTENTI (solo Admin) ────────────────────────────────── -->
     <section class="tab-panel" id="tab-utenti">
+      <div class="entry-form hidden" id="promozioni-box">
+        <h3 style="margin-bottom:0.5rem;"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> Promozioni Proposte</h3>
+        <p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem;">
+          Membri che hanno raggiunto i punti di un grado più alto. La promozione aggiorna anche la pagina Discepoli.
+        </p>
+        <div id="promozioni-list"></div>
+      </div>
+
       <div class="admin-table-wrap">
       <table class="admin-table" id="utenti-table">
         <thead>
-          <tr><th>Nome</th><th>Username</th><th>Email</th><th>Ruolo</th><th>Grado</th><th>Registrato il</th><th></th></tr>
+          <tr><th>Nome</th><th>Username</th><th>Email</th><th>Ruolo</th><th>Grado</th><th>Punti</th><th>Invitato da</th><th>Registrato il</th></tr>
         </thead>
         <tbody id="utenti-tbody"></tbody>
       </table>

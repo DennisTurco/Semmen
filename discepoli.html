@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
-  <title>Discepoli — La Setta del Semmen</title>
+  <title>Discepoli | La Setta del Semmen</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <style>
@@ -130,6 +130,19 @@
 
     <div id="discepoli-container"></div>
 
+    <!-- CLASSIFICA (semmen.classifica: punti guadagnati con le azioni sul sito) -->
+    <section class="classifica hidden" id="classifica" data-reveal>
+      <div class="grado-section__header">
+        <span class="grado-section__simbolo">✦</span>
+        <span class="grado-section__nome">Classifica dell'Ordine</span>
+      </div>
+      <p class="classifica__intro">
+        Punti per eventi frequentati, pagine dell'Archivio, attività completate,
+        inviti, foto e voti. Raggiunta la soglia di un grado, i Grandi Maestri valutano la promozione.
+      </p>
+      <ol class="classifica__lista" id="classifica-lista"></ol>
+    </section>
+
   </div>
 
   <!-- FOOTER -->
@@ -205,10 +218,29 @@
       return groups;
     }
 
+    async function loadClassifica(profile) {
+      const { data, error } = await SemmenAuth.db().rpc('classifica');
+      if (error || !data || !data.length) return;
+
+      const medaglie = ['🥇', '🥈', '🥉'];
+      document.getElementById('classifica-lista').innerHTML = data.map((c, i) => `
+        <li class="classifica__riga${c.user_id === profile.id ? ' classifica__riga--io' : ''}">
+          <span class="classifica__pos">${medaglie[i] || i + 1}</span>
+          <span class="classifica__nome">
+            ${escapeHtml(c.display_name)}${c.user_id === profile.id ? ' <em>(tu)</em>' : ''}
+            ${c.grado_nome ? `<small>${escapeHtml((c.grado_simbolo ? c.grado_simbolo + ' ' : '') + c.grado_nome)}</small>` : ''}
+          </span>
+          <span class="classifica__punti">${c.punti}</span>
+        </li>`).join('');
+      document.getElementById('classifica').classList.remove('hidden');
+    }
+
     (async function init() {
       // Elenco visibile solo a Compagno/Editor/Admin.
       const profile = await SemmenAuth.requireRole(['admin', 'editor', 'compagno']);
       if (!profile) return;
+
+      loadClassifica(profile);
 
       if (SemmenAuth.configured) {
         const { data, error } = await SemmenAuth.db()

@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
-  <title>Shop — La Setta del Semmen</title>
+  <title>Shop | La Setta del Semmen</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -55,7 +56,7 @@
     </p>
   </section>
 
-  <!-- PRODOTTI (configurabili da config.js) -->
+  <!-- PRODOTTI (gestiti dal Pannello, tab Prodotti) -->
   <section class="home-section" id="shop-products-section">
     <div class="container">
       <div class="section-header" data-reveal>
@@ -66,8 +67,13 @@
         </p>
       </div>
 
+      <!-- Visibile solo a Editor/Admin -->
+      <p class="hidden" id="shop-gestisci" style="text-align:center;margin:-1rem 0 2rem;">
+        <a href="pannello.html#prodotti" class="btn btn--outline"><i class="fa-solid fa-gear" aria-hidden="true"></i>Gestisci prodotti</a>
+      </p>
+
       <div class="feature-grid" id="shop-grid">
-        <!-- Popolato da JS con CONFIG.shop.products -->
+        <!-- Popolato da JS: tabella Supabase `prodotti`, con riserva statica -->
       </div>
     </div>
   </section>
@@ -153,31 +159,92 @@
       if (CONFIG.shop.sectionSubtitle) document.getElementById('shop-section-subtitle').textContent = CONFIG.shop.sectionSubtitle;
     }
 
-    // Prodotti
+    // Prodotti: dalla tabella Supabase `prodotti` (gestita dal Pannello).
+    // L'elenco statico serve solo se Supabase non è configurato o la
+    // tabella non è ancora stata creata (migrazione 009).
     const grid = document.getElementById('shop-grid');
-    const configProducts = CONFIG.shop && CONFIG.shop.products;
-    const products = (configProducts && configProducts.length) ? configProducts : [
+    const PRODOTTI_RISERVA = [
       { icon: '', image: 'img/shop/pene-tappo.jpeg', name: 'Tappo Pene', description: 'È un tappo pene. Si può montare sulle bottiglie delle bibite. Permette la fuoriuscita del liquido dalla punta. Articolo stampato con filamenti Semmici allo stato Tofu', price: '4€', available: true },
       { icon: '👕', name: 'T-Shirt del Semmen', description: 'Indossa il sigillo della Setta con orgoglio. Cotone sacro al 100% imbevuto di Semmen allo stato Tofu.', price: 'TBD', available: false },
       { icon: '🖨️', name: 'Indulgenza', description: 'Indulgenza ufficiale del Sacro Ordine del Semmen prodotta da fratello Giorgio.', price: 'TBD', available: false },
       { icon: '📿', name: 'Amuleto del Semmen', description: 'Non è un semplice portachiavi, è una reliquia protettiva per i fedeli. Allontana gli eretici. Stampata in 3d sicuramente non dalla stampante del fratello Fra. Vengono usati filamenti Semmici allo stato Tofu', price: 'TBD', available: false },
     ];
+    let products = [];
 
-    grid.innerHTML = products.map((p, i) => `
-      <div class="feature-card" data-reveal style="cursor:default;">
-        ${p.image ? `<img class="feature-card__image" src="${p.image}" alt="${p.name}">` : `<span class="feature-card__icon">${p.icon || '🛍️'}</span>`}
-        <h3 class="feature-card__title">${p.name}</h3>
-        <p class="feature-card__desc">${p.description}</p>
-        ${p.price ? `<p style="margin-top:0.75rem;font-family:var(--font-mono);font-size:0.8rem;color:var(--gold);letter-spacing:0.1em;">${p.price}</p>` : ''}
-        <button
-          type="button"
-          class="btn btn--primary order-btn"
-          style="width:100%;margin-top:1rem;"
-          data-product-index="${i}"
-          ${p.available === false ? 'disabled' : ''}
-        >${p.available === false ? 'Non disponibile' : 'Richiedi acquisto'}</button>
-      </div>
-    `).join('');
+    // catalogo_shop() dice quali prodotti esistono e in che ordine (anche
+    // quelli riservati); la select sulla tabella restituisce solo quelli
+    // che chi guarda può vedere (RLS). Un riservato non visibile diventa
+    // un riquadro censurato.
+    async function loadProducts() {
+      if (SemmenAuth.configured) {
+        const [{ data: catalogo, error }, { data: visibili }] = await Promise.all([
+          SemmenAuth.db().rpc('catalogo_shop'),
+          SemmenAuth.db().from('prodotti').select('*'),
+        ]);
+        if (!error && catalogo) {
+          return catalogo.map(c => {
+            const p = (visibili || []).find(x => x.id === c.id);
+            if (!p) return { censored: true };
+            return {
+              icon: p.icona, image: p.immagine, name: p.nome, reserved: p.riservato,
+              description: p.descrizione || '', price: p.prezzo, available: p.disponibile,
+            };
+          });
+        }
+        console.error('[Shop] catalogo:', error);
+      }
+      return PRODOTTI_RISERVA;
+    }
+
+    function censoredCard(isLogged) {
+      return `
+        <div class="feature-card feature-card--censurato" data-reveal style="cursor:default;">
+          <span class="feature-card__icon"><i class="fa-solid fa-lock" aria-hidden="true"></i></span>
+          <h3 class="feature-card__title">Reliquia Riservata</h3>
+          <p class="censura" aria-hidden="true"><span></span><span></span><span></span></p>
+          <p class="feature-card__desc">
+            Questo oggetto è custodito per i soli membri dell'Ordine.
+            Visibile dal grado di Compagno in su.
+          </p>
+          ${isLogged
+            ? `<a href="candidatura.html" class="btn btn--outline" style="width:100%;margin-top:1rem;justify-content:center;">Candidati alla Setta</a>`
+            : `<a href="login.html?redirect=shop.html" class="btn btn--outline" style="width:100%;margin-top:1rem;justify-content:center;">Accedi</a>`}
+        </div>`;
+    }
+
+    async function renderProducts() {
+      const isLogged = SemmenAuth.configured && !!(await SemmenAuth.getProfile());
+      grid.innerHTML = products.map((p, i) => p.censored ? censoredCard(isLogged) : `
+        <div class="feature-card" data-reveal style="cursor:default;">
+          ${p.reserved ? `<span class="feature-card__riservato"><i class="fa-solid fa-lock" aria-hidden="true"></i> Riservato alla Setta</span>` : ''}
+          ${p.image ? `<img class="feature-card__image" src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}">` : `<span class="feature-card__icon">${escapeHtml(p.icon || '🛍️')}</span>`}
+          <h3 class="feature-card__title">${escapeHtml(p.name)}</h3>
+          <p class="feature-card__desc">${escapeHtml(p.description)}</p>
+          ${p.price ? `<p style="margin-top:0.75rem;font-family:var(--font-mono);font-size:0.8rem;color:var(--gold);letter-spacing:0.1em;">${escapeHtml(p.price)}</p>` : ''}
+          <button
+            type="button"
+            class="btn btn--primary order-btn"
+            style="width:100%;margin-top:1rem;"
+            data-product-index="${i}"
+            ${p.available === false ? 'disabled' : ''}
+          >${p.available === false ? 'Non disponibile' : 'Richiedi acquisto'}</button>
+        </div>
+      `).join('') || `<p style="text-align:center;color:var(--text-muted);grid-column:1/-1;">Il catalogo è vuoto, per ora.</p>`;
+
+      grid.querySelectorAll('.order-btn').forEach(btn => {
+        btn.addEventListener('click', () => openOrderModal(products[Number(btn.dataset.productIndex)]));
+      });
+    }
+
+    loadProducts().then(list => { products = list; renderProducts(); });
+
+    if (SemmenAuth.configured) {
+      SemmenAuth.getProfile().then(profile => {
+        if (profile && (profile.role === 'admin' || profile.role === 'editor')) {
+          document.getElementById('shop-gestisci').classList.remove('hidden');
+        }
+      });
+    }
 
     /* ── Modal richiesta acquisto ─────────────────────────────── */
     const orderModal      = document.getElementById('order-modal');
@@ -208,13 +275,6 @@
       orderModal.classList.add('hidden');
       selectedProduct = null;
     }
-
-    grid.querySelectorAll('.order-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = Number(btn.dataset.productIndex);
-        openOrderModal(products[idx]);
-      });
-    });
 
     document.getElementById('order-modal-close').addEventListener('click', closeOrderModal);
     orderModal.addEventListener('click', e => {

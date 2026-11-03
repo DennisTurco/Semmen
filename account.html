@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
-  <title>Account — La Setta del Semmen</title>
+  <title>Account | La Setta del Semmen</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -70,6 +71,33 @@
           <p class="field-success" id="profile-success"></p>
           <button type="submit" class="btn btn--outline btn--block">Salva</button>
         </form>
+      </div>
+    </div>
+
+    <!-- PUNTI (solo Compagno+, calcolati da semmen.classifica) -->
+    <div class="card mt-3 hidden" id="punti-card" data-reveal>
+      <div class="card__body">
+        <h3 class="card__subtitle">I Tuoi Punti</h3>
+        <p class="punti-totale"><span id="punti-totale">0</span> punti</p>
+        <div class="punti-progresso hidden" id="punti-progresso">
+          <div class="punti-progresso__barra"><span id="punti-barra"></span></div>
+          <p class="form-hint" id="punti-prossimo"></p>
+        </div>
+        <ul class="punti-dettaglio" id="punti-dettaglio"></ul>
+        <p class="form-hint">
+          Raggiunti i punti di un grado, i Grandi Maestri valutano la tua promozione.
+          Classifica completa nella pagina <a href="discepoli.html">Discepoli</a>.
+        </p>
+      </div>
+    </div>
+
+    <!-- INVITI -->
+    <div class="card mt-3" data-reveal>
+      <div class="card__body">
+        <h3 class="card__subtitle">Invita nell'Ordine</h3>
+        <div id="invito-body">
+          <p class="list-empty">Imposta uno username qui sopra per avere il tuo link di invito.</p>
+        </div>
       </div>
     </div>
 
@@ -217,6 +245,86 @@
       }
 
       loadPartecipazioni();
+
+      /* ── Punti e prossimo grado (solo Compagno+) ───────────── */
+      const VOCI_PUNTI = [
+        // Stessi valori di semmen.calcola_punti() (migrazione 010)
+        ['eventi',   'Eventi frequentati',          10],
+        ['pagine',   "Pagine dell'Archivio scritte", 15],
+        ['attivita', 'Attività completate',          10],
+        ['inviti',   'Persone invitate diventate Compagni', 20],
+        ['foto',     'Foto nelle gallerie',           2],
+        ['voti',     'Voti nei sondaggi',             5],
+      ];
+
+      async function loadPunti() {
+        if (profile.role === 'utente') return;
+        const [{ data: classifica, error }, { data: gradi }] = await Promise.all([
+          SemmenAuth.db().rpc('classifica'),
+          SemmenAuth.db().from('gradi').select('nome, simbolo, punti_minimi').not('punti_minimi', 'is', null).order('punti_minimi'),
+        ]);
+        if (error) return;
+        const mio = (classifica || []).find(c => c.user_id === profile.id);
+        if (!mio) return;
+
+        document.getElementById('punti-card').classList.remove('hidden');
+        document.getElementById('punti-totale').textContent = mio.punti;
+        document.getElementById('punti-dettaglio').innerHTML = VOCI_PUNTI
+          .filter(([k]) => mio[k] > 0)
+          .map(([k, label, valore]) => `<li><span>${label} × ${mio[k]}</span><span>+${mio[k] * valore}</span></li>`)
+          .join('') || '<li><span>Ancora nessun punto: partecipa a un evento o scrivi nell\'Archivio.</span></li>';
+
+        const prossimo = (gradi || []).find(g => g.punti_minimi > mio.punti);
+        if (prossimo) {
+          const precedente = [...(gradi || [])].reverse().find(g => g.punti_minimi <= mio.punti);
+          const base = precedente ? precedente.punti_minimi : 0;
+          const perc = Math.round(((mio.punti - base) / (prossimo.punti_minimi - base)) * 100);
+          document.getElementById('punti-barra').style.width = `${perc}%`;
+          document.getElementById('punti-prossimo').textContent =
+            `Mancano ${prossimo.punti_minimi - mio.punti} punti a ${prossimo.simbolo ? prossimo.simbolo + ' ' : ''}${prossimo.nome}.`;
+          document.getElementById('punti-progresso').classList.remove('hidden');
+        }
+      }
+
+      /* ── Link di invito + persone invitate ─────────────────── */
+      async function loadInviti() {
+        const body = document.getElementById('invito-body');
+        if (!profile.username) return;
+
+        const link = urlSito(`registrati.html?invito=${encodeURIComponent(profile.username)}`);
+        const { data: invitati } = await SemmenAuth.db().rpc('miei_invitati');
+
+        body.innerHTML = `
+          <p class="form-hint" style="margin-bottom:0.75rem;">
+            Chi si registra da questo link risulta invitato da te. Ogni invitato che diventa Compagno vale 20 punti.
+          </p>
+          <div class="invito-link">
+            <input type="text" class="form-input" id="invito-link" readonly value="${escapeHtml(link)}" aria-label="Il tuo link di invito">
+            <button type="button" class="btn btn--outline" id="invito-copia"><i class="fa-solid fa-copy" aria-hidden="true"></i>Copia</button>
+            <button type="button" class="btn btn--primary" id="invito-whatsapp"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i>WhatsApp</button>
+          </div>
+          <p class="list-row__meta" style="margin-top:1rem;">
+            ${(invitati || []).length
+              ? `Hai invitato: ${invitati.map(i => escapeHtml(i.display_name) + (i.membro ? '' : ' (non ancora Compagno)')).join(', ')}`
+              : 'Non hai ancora invitato nessuno.'}
+          </p>`;
+
+        document.getElementById('invito-copia').addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(link);
+            showToast('Link di invito copiato.');
+          } catch {
+            document.getElementById('invito-link').select();
+            showToast('Seleziona il link e copialo a mano.', 'info');
+          }
+        });
+        document.getElementById('invito-whatsapp').addEventListener('click', () => {
+          condividiWhatsApp(`La Setta del Semmen ti attende. Registrati da qui: ${link}`);
+        });
+      }
+
+      loadPunti();
+      loadInviti();
     })();
   </script>
 </body>

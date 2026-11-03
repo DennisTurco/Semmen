@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
-  <title>Dettaglio Evento — La Setta del Semmen</title>
+  <title>Dettaglio Evento | La Setta del Semmen</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -40,6 +41,9 @@
       <p class="page-header__label"><a href="eventi.html">← Eventi</a></p>
       <h1 class="page-header__title" id="evento-titolo">Dettaglio Evento</h1>
       <p class="page-header__subtitle" id="evento-meta"></p>
+      <button type="button" class="btn btn--ghost hidden" id="evento-condividi" style="margin-top:1rem;">
+        <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>Condividi su WhatsApp
+      </button>
     </div>
 
     <div class="card mt-4" data-reveal>
@@ -48,6 +52,30 @@
         <div id="partecipanti-list">
           <p class="list-empty">Caricamento...</p>
         </div>
+      </div>
+    </div>
+
+    <!-- GALLERIA: foto caricate dai Compagni+ (bucket privato eventi-foto) -->
+    <div class="card mt-3" data-reveal>
+      <div class="card__body">
+        <h3 class="card__subtitle">Galleria</h3>
+        <div class="galleria-upload">
+          <label class="btn btn--outline" for="galleria-file">
+            <i class="fa-solid fa-camera" aria-hidden="true"></i>Aggiungi foto
+          </label>
+          <input type="file" id="galleria-file" accept="image/*" multiple class="visually-hidden">
+          <span class="form-hint" id="galleria-stato">Puoi selezionarne più di una: vengono ridimensionate prima del caricamento.</span>
+        </div>
+        <div class="galleria" id="galleria"></div>
+      </div>
+    </div>
+
+    <!-- Foto a tutto schermo -->
+    <div class="modal-overlay hidden" id="foto-modal">
+      <div class="foto-modal">
+        <button class="modal-box__close" id="foto-modal-close" aria-label="Chiudi" type="button">&times;</button>
+        <img id="foto-modal-img" alt="">
+        <p class="foto-modal__meta" id="foto-modal-meta"></p>
       </div>
     </div>
 

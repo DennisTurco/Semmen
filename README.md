@@ -41,7 +41,7 @@ Il `role` (tabella `semmen.profiles`) determina i **permessi**. È diverso dal *
 
 ### `editor`
 
-- Può: tutto quello che può un `compagno`, più: accedere al Pannello e gestire i **contenuti** — creare/modificare/eliminare Eventi, Discepoli e Gradi; vedere quanti si sono candidati a ogni evento; collegare un Discepolo a un account tramite un elenco minimale di utenti (solo id + nome mostrato, non l'intero profilo).
+- Può: tutto quello che può un `compagno`, più: accedere al Pannello e gestire i **contenuti** — creare/modificare/eliminare Eventi, Discepoli e Gradi; scrivere, creare ed eliminare le pagine dell'Archivio direttamente da `wiki.html` (pulsanti **Modifica** / **Nuova pagina**, con cronologia delle versioni); vedere quanti si sono candidati a ogni evento; collegare un Discepolo a un account tramite un elenco minimale di utenti (solo id + nome mostrato, non l'intero profilo).
 - Non può: vedere la tab Utenti del Pannello, cambiare ruolo o grado di un utente (bloccato anche lato database, non solo nella UI).
 
 ### `admin`

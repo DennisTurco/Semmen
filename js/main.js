@@ -99,6 +99,84 @@ function calcolaStatoEvento(dataStr) {
   return 'In programma';
 }
 
+/* ── Testo sicuro dentro innerHTML ───────────────────────────────
+   Per i dati scritti dagli utenti (nomi, titoli, descrizioni) che
+   finiscono in un template HTML. */
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+/* ── Condivisione su WhatsApp (il gruppo usa solo quello) ───────
+   urlSito('eventi.html') → indirizzo completo della pagina, funziona
+   anche quando il sito sta in una sottocartella (GitHub Pages). */
+function urlSito(pagina) {
+  return new URL(pagina, location.href).href;
+}
+
+function condividiWhatsApp(testo) {
+  window.open(`https://wa.me/?text=${encodeURIComponent(testo)}`, '_blank', 'noopener');
+}
+
+/* ── Toast (feedback sulle azioni, es. Pannello e Archivio) ──────
+   showToast('Evento salvato')                → conferma
+   showToast(error.message, 'error')          → errore, resta di più
+   Il testo va sempre in textContent: si possono passare anche
+   messaggi che contengono dati inseriti dagli utenti. */
+const TOAST_DURATA_MS = { success: 3500, info: 3500, error: 7000 };
+const TOAST_ICONE = { success: '✓', info: 'ℹ', error: '✕' };
+
+function showToast(message, type = 'success') {
+  let stack = document.getElementById('toast-stack');
+  if (!stack) {
+    stack = document.createElement('div');
+    stack.id = 'toast-stack';
+    stack.className = 'toast-stack';
+    document.body.appendChild(stack);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast--${type}`;
+  // Gli errori interrompono lo screen reader, le conferme no
+  toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+
+  const icon = document.createElement('span');
+  icon.className = 'toast__icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = TOAST_ICONE[type] || TOAST_ICONE.info;
+
+  const text = document.createElement('span');
+  text.className = 'toast__text';
+  text.textContent = message;
+
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'toast__close';
+  close.setAttribute('aria-label', 'Chiudi notifica');
+  close.textContent = '×';
+
+  toast.append(icon, text, close);
+  stack.appendChild(toast);
+  // Al massimo 4 toast insieme: i più vecchi lasciano il posto
+  while (stack.children.length > 4) stack.firstElementChild.remove();
+  requestAnimationFrame(() => toast.classList.add('is-visible'));
+
+  let timer;
+  function dismiss() {
+    clearTimeout(timer);
+    toast.classList.remove('is-visible');
+    setTimeout(() => toast.remove(), 250);
+  }
+  function startTimer() { timer = setTimeout(dismiss, TOAST_DURATA_MS[type] || TOAST_DURATA_MS.info); }
+
+  close.addEventListener('click', dismiss);
+  // Il passaggio del mouse ferma il timer, così si fa in tempo a leggere
+  toast.addEventListener('mouseenter', () => clearTimeout(timer));
+  toast.addEventListener('mouseleave', startTimer);
+  startTimer();
+}
+
 /* ── Animazioni on-scroll ───────────────────────────────────────
    Diverse pagine (eventi.js, discepoli.html, attivita.js…) iniettano
    card con [data-reveal] DOPO il caricamento di main.js (es. dopo una

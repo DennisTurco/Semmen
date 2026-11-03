@@ -9,7 +9,8 @@
   const sb = SemmenAuth.db();
   const isAdmin = profile.role === 'admin';
 
-  /* ── Modal conferma/avviso (sostituisce confirm()/alert()) ────── */
+  /* ── Modal di conferma (sostituisce confirm()); esiti ed errori
+     delle azioni passano dai toast, vedi showToast in main.js ───── */
   function showModal({ title, message, showCancel }) {
     return new Promise(resolve => {
       const overlay  = document.getElementById('confirm-modal');
@@ -42,8 +43,11 @@
     return showModal({ title: 'Conferma', message, showCancel: true });
   }
 
-  async function alertDialog(message) {
-    await showModal({ title: 'Attenzione', message, showCancel: false });
+  // I moduli "Nuovo …" sono chiusi di base: Modifica li apre e li porta in vista
+  function apriModulo(form) {
+    const box = form.closest('details');
+    box.open = true;
+    box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   /* ── Tabs ───────────────────────────────────────────────────── */
@@ -58,8 +62,23 @@
       tabPanels.forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+      history.replaceState(null, '', `#${btn.dataset.tab}`);
     });
   });
+
+  // pannello.html#prodotti apre direttamente quella tab (es. link dallo Shop)
+  const tabIniziale = document.querySelector(`.tab-btn[data-tab="${location.hash.slice(1)}"]:not(.hidden)`);
+  if (tabIniziale) tabIniziale.click();
+
+  /* ── Upload immagini (bucket pubblici di Supabase Storage) ──── */
+  async function uploadImmagine(bucket, file) {
+    const ext  = file.name.split('.').pop();
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await SemmenAuth.client.storage.from(bucket).upload(path, file, { upsert: false });
+    if (error) return { error };
+    const { data } = SemmenAuth.client.storage.from(bucket).getPublicUrl(path);
+    return { url: data.publicUrl };
+  }
 
   /* ── GRADI (caricati una volta, usati da Discepoli e Utenti) ─── */
   let gradiList = [];
@@ -118,8 +137,8 @@
         <td>${organizzatoreLabel(ev.organizzatore_id)}</td>
         <td><a href="dettaglio-evento.html#${ev.id}">${counts[ev.id] || 0}</a></td>
         <td class="row-actions">
-          <button type="button" class="btn btn--outline" data-edit="${ev.id}">Modifica</button>
-          <button type="button" class="btn btn--ghost" data-delete="${ev.id}">Elimina</button>
+          <button type="button" class="btn btn--outline" data-edit="${ev.id}"><i class="fa-solid fa-pen" aria-hidden="true"></i>Modifica</button>
+          <button type="button" class="btn btn--ghost" data-delete="${ev.id}"><i class="fa-solid fa-trash" aria-hidden="true"></i>Elimina</button>
         </td>
       </tr>
     `).join('') || `<tr><td colspan="6">Nessun evento. Aggiungine uno dal modulo qui sopra.</td></tr>`;
@@ -156,20 +175,15 @@
 
     eventoUploadStatus.textContent = 'Caricamento in corso...';
 
-    const ext  = file.name.split('.').pop();
-    const path = `${crypto.randomUUID()}.${ext}`;
-
-    const { error: uploadError } = await SemmenAuth.client
-      .storage.from('eventi-immagini')
-      .upload(path, file, { upsert: false });
+    const { url, error: uploadError } = await uploadImmagine('eventi-immagini', file);
 
     if (uploadError) {
       eventoUploadStatus.textContent = `Errore upload: ${uploadError.message}`;
+      showToast(`Caricamento immagine non riuscito: ${uploadError.message}`, 'error');
       return;
     }
 
-    const { data } = SemmenAuth.client.storage.from('eventi-immagini').getPublicUrl(path);
-    eventoImmagineEl.value = data.publicUrl;
+    eventoImmagineEl.value = url;
     updateEventoPreview();
     eventoUploadStatus.textContent = '✓ Immagine caricata.';
   });
@@ -187,7 +201,7 @@
     updateEventoPreview();
     eventoUploadStatus.textContent = UPLOAD_STATUS_DEFAULT;
     eventoCancel.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    apriModulo(eventoForm);
   }
 
   function resetEventoForm() {
@@ -204,7 +218,8 @@
   async function deleteEvento(id) {
     if (!(await confirmDialog('Eliminare questo evento? L\'azione è irreversibile.'))) return;
     const { error } = await sb.from('eventi').delete().eq('id', id);
-    if (error) { await alertDialog(error.message); return; }
+    if (error) { showToast(error.message, 'error'); return; }
+    showToast('Evento eliminato.');
     loadEventi();
   }
 
@@ -231,6 +246,7 @@
       : await sb.from('eventi').insert({ ...payload, organizzatore_id: profile.id });
 
     if (error) { eventoError.textContent = error.message; return; }
+    showToast(id ? `Evento "${payload.titolo}" aggiornato.` : `Evento "${payload.titolo}" creato.`);
     resetEventoForm();
     loadEventi();
   });
@@ -272,8 +288,8 @@
         <td>${utenteLabel}</td>
         <td>${d.nota || ''}</td>
         <td class="row-actions">
-          <button type="button" class="btn btn--outline" data-edit="${d.id}">Modifica</button>
-          <button type="button" class="btn btn--ghost" data-delete="${d.id}">Elimina</button>
+          <button type="button" class="btn btn--outline" data-edit="${d.id}"><i class="fa-solid fa-pen" aria-hidden="true"></i>Modifica</button>
+          <button type="button" class="btn btn--ghost" data-delete="${d.id}"><i class="fa-solid fa-trash" aria-hidden="true"></i>Elimina</button>
         </td>
       </tr>`;
     }).join('') || `<tr><td colspan="5">Nessun discepolo registrato. Aggiungine uno dal modulo qui sopra.</td></tr>`;
@@ -294,7 +310,7 @@
     document.getElementById('discepolo-nota').value = d.nota || '';
     discepoloUtenteEl.dispatchEvent(new Event('change'));
     discepoloCancel.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    apriModulo(discepoloForm);
   }
 
   function resetDiscepoloForm() {
@@ -311,7 +327,8 @@
   async function deleteDiscepolo(id) {
     if (!(await confirmDialog('Eliminare questo discepolo?'))) return;
     const { error } = await sb.from('discepoli').delete().eq('id', id);
-    if (error) { await alertDialog(error.message); return; }
+    if (error) { showToast(error.message, 'error'); return; }
+    showToast('Discepolo eliminato.');
     loadDiscepoli();
   }
 
@@ -340,6 +357,7 @@
       : await sb.from('discepoli').insert(payload);
 
     if (error) { discepoloError.textContent = error.message; return; }
+    showToast(id ? `Discepolo "${payload.nome}" aggiornato.` : `Discepolo "${payload.nome}" aggiunto.`);
     resetDiscepoloForm();
     loadDiscepoli();
   });
@@ -359,13 +377,14 @@
       <tr>
         <td>${g.ordine}</td>
         <td>${g.simbolo ? g.simbolo + ' ' : ''}${g.nome}</td>
+        <td>${g.punti_minimi ?? '—'}</td>
         <td>${(g.descrizione || '').slice(0, 90)}${(g.descrizione || '').length > 90 ? '…' : ''}</td>
         <td class="row-actions">
-          <button type="button" class="btn btn--outline" data-edit="${g.id}">Modifica</button>
-          <button type="button" class="btn btn--ghost" data-delete="${g.id}">Elimina</button>
+          <button type="button" class="btn btn--outline" data-edit="${g.id}"><i class="fa-solid fa-pen" aria-hidden="true"></i>Modifica</button>
+          <button type="button" class="btn btn--ghost" data-delete="${g.id}"><i class="fa-solid fa-trash" aria-hidden="true"></i>Elimina</button>
         </td>
       </tr>
-    `).join('') || `<tr><td colspan="4">Nessun grado configurato.</td></tr>`;
+    `).join('') || `<tr><td colspan="5">Nessun grado configurato.</td></tr>`;
 
     gradiTbody.querySelectorAll('[data-edit]').forEach(btn => {
       btn.addEventListener('click', () => editGrado(data.find(g => g.id === btn.dataset.edit)));
@@ -382,8 +401,9 @@
     document.getElementById('grado-ordine').value       = g.ordine ?? 0;
     document.getElementById('grado-descrizione').value  = g.descrizione || '';
     document.getElementById('grado-privilegi').value    = g.privilegi || '';
+    document.getElementById('grado-punti').value        = g.punti_minimi ?? '';
     gradoCancel.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    apriModulo(gradoForm);
   }
 
   function resetGradoForm() {
@@ -398,7 +418,8 @@
   async function deleteGrado(id) {
     if (!(await confirmDialog('Eliminare questo grado? Fallisce se è ancora usato da discepoli o utenti.'))) return;
     const { error } = await sb.from('gradi').delete().eq('id', id);
-    if (error) { await alertDialog(error.message); return; }
+    if (error) { showToast(error.message, 'error'); return; }
+    showToast('Grado eliminato.');
     await refreshGradiOvunque();
   }
 
@@ -412,6 +433,8 @@
       ordine:      Number(document.getElementById('grado-ordine').value) || 0,
       descrizione: document.getElementById('grado-descrizione').value.trim() || null,
       privilegi:   document.getElementById('grado-privilegi').value.trim() || null,
+      // Vuoto = grado che non si guadagna coi punti
+      punti_minimi: document.getElementById('grado-punti').value === '' ? null : Number(document.getElementById('grado-punti').value),
     };
 
     const id = gradoIdEl.value;
@@ -420,6 +443,7 @@
       : await sb.from('gradi').insert(payload);
 
     if (error) { gradoError.textContent = error.message; return; }
+    showToast(id ? `Grado "${payload.nome}" aggiornato.` : `Grado "${payload.nome}" creato.`);
     resetGradoForm();
     await refreshGradiOvunque();
   });
@@ -432,14 +456,201 @@
     if (isAdmin) loadUtenti();
   }
 
+  /* ── PRODOTTI (catalogo dello Shop) ─────────────────────────── */
+  const prodottoForm     = document.getElementById('prodotto-form');
+  const prodottoFormTitle = document.getElementById('prodotto-form-title');
+  const prodottoIdEl     = document.getElementById('prodotto-id');
+  const prodottoError    = document.getElementById('prodotto-error');
+  const prodottoCancel   = document.getElementById('prodotto-cancel-btn');
+  const prodottiTbody    = document.getElementById('prodotti-tbody');
+  const prodottoImmagineEl   = document.getElementById('prodotto-immagine');
+  const prodottoImmagineFile = document.getElementById('prodotto-immagine-file');
+  const prodottoUploadStatus = document.getElementById('prodotto-upload-status');
+  const prodottoImmaginePreview = document.getElementById('prodotto-immagine-preview');
+  const PRODOTTO_UPLOAD_DEFAULT = prodottoUploadStatus.textContent;
+  let prodottiList = [];
+
+  async function loadProdotti() {
+    const { data, error } = await sb.from('prodotti').select('*').order('ordine').order('nome');
+    if (error) { prodottoError.textContent = error.message; return; }
+    prodottiList = data || [];
+
+    prodottiTbody.innerHTML = prodottiList.map(p => `
+      <tr>
+        <td>${p.ordine}</td>
+        <td>${p.immagine ? '' : escapeHtml(p.icona || '🛍️') + ' '}${escapeHtml(p.nome)}</td>
+        <td>${escapeHtml(p.prezzo || '—')}</td>
+        <td>
+          <label class="form-checkbox" title="Rende il prodotto acquistabile o lo segna come non disponibile">
+            <input type="checkbox" data-disponibile="${p.id}" ${p.disponibile ? 'checked' : ''}>
+          </label>
+        </td>
+        <td>${p.riservato ? '<i class="fa-solid fa-lock" aria-hidden="true"></i> Sì' : '—'}</td>
+        <td class="row-actions">
+          <button type="button" class="btn btn--outline" data-edit="${p.id}"><i class="fa-solid fa-pen" aria-hidden="true"></i>Modifica</button>
+          <button type="button" class="btn btn--ghost" data-delete="${p.id}"><i class="fa-solid fa-trash" aria-hidden="true"></i>Elimina</button>
+        </td>
+      </tr>
+    `).join('') || `<tr><td colspan="6">Nessun prodotto. Aggiungine uno dal modulo qui sopra.</td></tr>`;
+
+    prodottiTbody.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => editProdotto(prodottiList.find(p => p.id === btn.dataset.edit)));
+    });
+    prodottiTbody.querySelectorAll('[data-delete]').forEach(btn => {
+      btn.addEventListener('click', () => deleteProdotto(btn.dataset.delete));
+    });
+    // Disponibilità modificabile direttamente dalla tabella, senza aprire il modulo
+    prodottiTbody.querySelectorAll('[data-disponibile]').forEach(box => {
+      box.addEventListener('change', async () => {
+        const p = prodottiList.find(x => x.id === box.dataset.disponibile);
+        const { error } = await sb.from('prodotti')
+          .update({ disponibile: box.checked, updated_at: new Date().toISOString() })
+          .eq('id', p.id);
+        if (error) { showToast(error.message, 'error'); loadProdotti(); return; }
+        p.disponibile = box.checked;
+        showToast(`"${p.nome}" ${box.checked ? 'ora è disponibile' : 'segnato come non disponibile'}.`);
+      });
+    });
+  }
+
+  function updateProdottoPreview() {
+    const url = prodottoImmagineEl.value.trim();
+    prodottoImmaginePreview.classList.toggle('hidden', !url);
+    if (url) prodottoImmaginePreview.src = url;
+  }
+
+  prodottoImmagineEl.addEventListener('input', updateProdottoPreview);
+
+  prodottoImmagineFile.addEventListener('change', async () => {
+    const file = prodottoImmagineFile.files[0];
+    if (!file) return;
+
+    prodottoUploadStatus.textContent = 'Caricamento in corso...';
+    const { url, error } = await uploadImmagine('prodotti-immagini', file);
+    if (error) {
+      prodottoUploadStatus.textContent = `Errore upload: ${error.message}`;
+      showToast(`Caricamento immagine non riuscito: ${error.message}`, 'error');
+      return;
+    }
+
+    prodottoImmagineEl.value = url;
+    updateProdottoPreview();
+    prodottoUploadStatus.textContent = '✓ Immagine caricata.';
+  });
+
+  function editProdotto(p) {
+    prodottoIdEl.value = p.id;
+    prodottoFormTitle.textContent = `Modifica: ${p.nome}`;
+    document.getElementById('prodotto-nome').value        = p.nome || '';
+    document.getElementById('prodotto-prezzo').value      = p.prezzo || '';
+    document.getElementById('prodotto-ordine').value      = p.ordine ?? 0;
+    document.getElementById('prodotto-icona').value       = p.icona || '';
+    document.getElementById('prodotto-disponibile').checked = p.disponibile;
+    document.getElementById('prodotto-riservato').checked   = !!p.riservato;
+    document.getElementById('prodotto-descrizione').value = p.descrizione || '';
+    prodottoImmagineEl.value = p.immagine || '';
+    updateProdottoPreview();
+    prodottoUploadStatus.textContent = PRODOTTO_UPLOAD_DEFAULT;
+    prodottoCancel.classList.remove('hidden');
+    apriModulo(prodottoForm);
+  }
+
+  function resetProdottoForm() {
+    prodottoForm.reset();
+    prodottoIdEl.value = '';
+    prodottoFormTitle.textContent = 'Nuovo Prodotto';
+    // Un nuovo prodotto va in fondo al catalogo
+    document.getElementById('prodotto-ordine').value = Math.max(0, ...prodottiList.map(p => p.ordine)) + 10;
+    prodottoCancel.classList.add('hidden');
+    prodottoError.textContent = '';
+    prodottoUploadStatus.textContent = PRODOTTO_UPLOAD_DEFAULT;
+    prodottoImmaginePreview.classList.add('hidden');
+  }
+
+  prodottoCancel.addEventListener('click', resetProdottoForm);
+
+  async function deleteProdotto(id) {
+    const p = prodottiList.find(x => x.id === id);
+    if (!(await confirmDialog(`Eliminare "${p.nome}" dal catalogo? L'azione è irreversibile.`))) return;
+    const { error } = await sb.from('prodotti').delete().eq('id', id);
+    if (error) { showToast(error.message, 'error'); return; }
+    showToast(`"${p.nome}" eliminato dal catalogo.`);
+    await loadProdotti();
+    if (!prodottoIdEl.value) resetProdottoForm();
+  }
+
+  prodottoForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    prodottoError.textContent = '';
+
+    const payload = {
+      nome:        document.getElementById('prodotto-nome').value.trim(),
+      prezzo:      document.getElementById('prodotto-prezzo').value.trim() || null,
+      ordine:      Number(document.getElementById('prodotto-ordine').value) || 0,
+      immagine:    prodottoImmagineEl.value.trim() || null,
+      icona:       document.getElementById('prodotto-icona').value.trim() || null,
+      disponibile: document.getElementById('prodotto-disponibile').checked,
+      riservato:   document.getElementById('prodotto-riservato').checked,
+      descrizione: document.getElementById('prodotto-descrizione').value.trim() || null,
+      updated_at:  new Date().toISOString(),
+    };
+
+    const id = prodottoIdEl.value;
+    const { error } = id
+      ? await sb.from('prodotti').update(payload).eq('id', id)
+      : await sb.from('prodotti').insert(payload);
+
+    if (error) { prodottoError.textContent = error.message; return; }
+    showToast(id ? `Prodotto "${payload.nome}" aggiornato.` : `Prodotto "${payload.nome}" aggiunto al catalogo.`);
+    await loadProdotti();
+    resetProdottoForm();
+  });
+
   /* ── UTENTI (solo Admin) ────────────────────────────────────── */
   const utentiTbody = document.getElementById('utenti-tbody');
   const ROLES = ['admin', 'editor', 'compagno', 'utente'];
 
+  const promozioniBox  = document.getElementById('promozioni-box');
+  const promozioniList = document.getElementById('promozioni-list');
+
+  async function loadPromozioni() {
+    const { data, error } = await sb.rpc('promozioni_proposte');
+    if (error) { console.error('[Pannello] promozioni_proposte:', error); promozioniBox.classList.add('hidden'); return; }
+
+    promozioniBox.classList.toggle('hidden', !data.length);
+    promozioniList.innerHTML = data.map(pr => `
+      <div class="list-row">
+        <div>
+          <p class="list-row__title">${escapeHtml(pr.display_name)} · ${pr.punti} punti</p>
+          <p class="list-row__meta">${escapeHtml(pr.grado_attuale || 'Nessun grado')} → <strong>${escapeHtml(pr.grado_proposto)}</strong></p>
+        </div>
+        <button type="button" class="btn btn--primary" data-promuovi="${pr.user_id}">
+          <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>Promuovi
+        </button>
+      </div>`).join('');
+
+    promozioniList.querySelectorAll('[data-promuovi]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const pr = data.find(x => x.user_id === btn.dataset.promuovi);
+        if (!(await confirmDialog(`Promuovere ${pr.display_name} a ${pr.grado_proposto}?`))) return;
+        const { error: promError } = await sb.rpc('admin_promuovi', { target_user_id: pr.user_id, new_grado_id: pr.grado_proposto_id });
+        if (promError) { showToast(promError.message, 'error'); return; }
+        showToast(`${pr.display_name} ora è ${pr.grado_proposto}.`);
+        loadUtenti();
+        loadDiscepoli();
+      });
+    });
+  }
+
   async function loadUtenti() {
     if (!isAdmin) return;
-    const { data, error } = await sb.from('admin_users').select('*').order('created_at', { ascending: false });
-    if (error) { utentiTbody.innerHTML = `<tr><td colspan="7">${error.message}</td></tr>`; return; }
+    const [{ data, error }, { data: classifica }] = await Promise.all([
+      sb.from('admin_users').select('*').order('created_at', { ascending: false }),
+      sb.rpc('classifica'),
+    ]);
+    if (error) { utentiTbody.innerHTML = `<tr><td colspan="8">${error.message}</td></tr>`; return; }
+    const puntiDi = Object.fromEntries((classifica || []).map(c => [c.user_id, c.punti]));
+    loadPromozioni();
 
     utentiTbody.innerHTML = (data || []).map(u => `
       <tr>
@@ -457,23 +668,29 @@
             ${gradiList.map(g => `<option value="${g.id}" ${g.id === u.grado_id ? 'selected' : ''}>${g.simbolo ? g.simbolo + ' ' : ''}${g.nome}</option>`).join('')}
           </select>
         </td>
+        <td>${puntiDi[u.id] ?? '—'}</td>
+        <td>
+          <select class="form-select" data-invitante-for="${u.id}">
+            <option value="">— Nessuno —</option>
+            ${directory.filter(d => d.id !== u.id).map(d => `<option value="${d.id}" ${d.id === u.invitato_da ? 'selected' : ''}>${escapeHtml(d.display_name)}</option>`).join('')}
+          </select>
+        </td>
         <td>${new Date(u.created_at).toLocaleDateString('it-IT')}</td>
-        <td><span class="hidden" id="saved-${u.id}" style="color:var(--gold);font-size:0.75rem;">✓ salvato</span></td>
       </tr>
-    `).join('') || `<tr><td colspan="7">Nessun utente registrato.</td></tr>`;
+    `).join('') || `<tr><td colspan="8">Nessun utente registrato.</td></tr>`;
 
-    function flashSaved(userId) {
-      const badge = document.getElementById(`saved-${userId}`);
-      badge.classList.remove('hidden');
-      setTimeout(() => badge.classList.add('hidden'), 2000);
-    }
+    const nomeUtente = id => {
+      const u = data.find(x => x.id === id);
+      return u ? (u.username || u.full_name || u.email) : 'utente';
+    };
 
     utentiTbody.querySelectorAll('[data-role-for]').forEach(select => {
       select.addEventListener('change', async () => {
         const userId = select.dataset.roleFor;
         const { error } = await sb.rpc('admin_set_role', { target_user_id: userId, new_role: select.value });
-        if (error) { await alertDialog(error.message); return; }
-        flashSaved(userId);
+        // In caso di errore si ricarica la tabella, così la select torna al valore reale
+        if (error) { showToast(error.message, 'error'); loadUtenti(); return; }
+        showToast(`Ruolo di ${nomeUtente(userId)}: ${SemmenAuth.ROLE_LABELS[select.value]}.`);
       });
     });
 
@@ -481,8 +698,20 @@
       select.addEventListener('change', async () => {
         const userId = select.dataset.gradoFor;
         const { error } = await sb.rpc('admin_set_grado', { target_user_id: userId, new_grado_id: select.value || null });
-        if (error) { await alertDialog(error.message); return; }
-        flashSaved(userId);
+        if (error) { showToast(error.message, 'error'); loadUtenti(); return; }
+        showToast(`Grado di ${nomeUtente(userId)}: ${select.value ? gradoLabel(select.value) : 'nessuno'}.`);
+        loadPromozioni();
+      });
+    });
+
+    utentiTbody.querySelectorAll('[data-invitante-for]').forEach(select => {
+      select.addEventListener('change', async () => {
+        const userId = select.dataset.invitanteFor;
+        const { error } = await sb.rpc('admin_set_invitante', { target_user_id: userId, invitante_id: select.value || null });
+        if (error) { showToast(error.message, 'error'); loadUtenti(); return; }
+        showToast(select.value
+          ? `${nomeUtente(userId)} risulta invitato da ${nomeUtente(select.value)}.`
+          : `Rimosso l'invitante di ${nomeUtente(userId)}.`);
       });
     });
   }
@@ -493,5 +722,6 @@
   loadEventi();
   loadDiscepoli();
   loadGradiTab();
+  loadProdotti().then(resetProdottoForm);
   loadUtenti();
 })();

@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Archivio — La Setta del Semmen</title>
+  <title>Archivio | La Setta del Semmen</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -81,15 +82,96 @@
     </aside>
 
     <!-- MAIN CONTENT -->
-    <main class="wiki-content">
-      <div id="wiki-page-meta"></div>
-      <h1 id="wiki-page-title" style="margin-bottom:1rem;"></h1>
-      <div id="wiki-body">
-        <div class="wiki-placeholder">
-          <div class="wiki-placeholder__seal seal-container" style="width:80px;height:80px;margin:0 auto 1.5rem;opacity:0.3;"></div>
-          <p style="color:var(--text-muted);">Seleziona un documento dall'archivio.</p>
+    <main class="wiki-content" id="wiki-content">
+      <!-- Visibile solo a Editor/Admin (gestito da wiki.js) -->
+      <div class="wiki-toolbar hidden" id="wiki-toolbar">
+        <button type="button" class="btn btn--outline" id="wiki-edit-btn"><i class="fa-solid fa-pen" aria-hidden="true"></i>Modifica</button>
+        <button type="button" class="btn btn--ghost" id="wiki-new-btn"><i class="fa-solid fa-plus" aria-hidden="true"></i>Nuova pagina</button>
+      </div>
+
+      <div id="wiki-view">
+        <div id="wiki-page-meta"></div>
+        <h1 id="wiki-page-title" style="margin-bottom:1rem;"></h1>
+        <div id="wiki-body">
+          <div class="wiki-placeholder">
+            <div class="wiki-placeholder__seal seal-container" style="width:80px;height:80px;margin:0 auto 1.5rem;opacity:0.3;"></div>
+            <p style="color:var(--text-muted);">Seleziona un documento dall'archivio.</p>
+          </div>
         </div>
       </div>
+
+      <!-- EDITOR -->
+      <section class="wiki-editor hidden" id="wiki-editor">
+        <h2 class="wiki-editor__heading" id="wiki-editor-heading">Modifica</h2>
+        <form id="wiki-editor-form">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="wiki-ed-titolo">Titolo <span class="required">*</span></label>
+              <input type="text" id="wiki-ed-titolo" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wiki-ed-slug">Identificativo</label>
+              <input type="text" id="wiki-ed-slug" class="form-input" placeholder="nome-pagina">
+              <p class="form-hint">Compare nell'indirizzo (wiki.html#nome-pagina). Non si cambia dopo la creazione.</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wiki-ed-gruppo">Gruppo</label>
+              <input type="text" id="wiki-ed-gruppo" class="form-input" list="wiki-ed-gruppi" placeholder="Sezione della barra laterale">
+              <datalist id="wiki-ed-gruppi"></datalist>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="wiki-ed-ordine">Ordine</label>
+                <input type="number" id="wiki-ed-ordine" class="form-input" step="10">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="wiki-ed-badge">Badge</label>
+                <input type="text" id="wiki-ed-badge" class="form-input" placeholder="es. NUOVO">
+              </div>
+            </div>
+          </div>
+          <label class="form-checkbox" style="margin-bottom:1.25rem;">
+            <input type="checkbox" id="wiki-ed-protetta">
+            <span class="form-checkbox__label">Riservata: visibile solo dal grado di Compagno in su</span>
+          </label>
+
+          <div class="wiki-editor__format" role="toolbar" aria-label="Formattazione">
+            <button type="button" data-format="bold" title="Grassetto (Ctrl+B)"><i class="fa-solid fa-bold" aria-hidden="true"></i></button>
+            <button type="button" data-format="italic" title="Corsivo (Ctrl+I)"><i class="fa-solid fa-italic" aria-hidden="true"></i></button>
+            <button type="button" data-format="h2" title="Titolo">H2</button>
+            <button type="button" data-format="h3" title="Sottotitolo">H3</button>
+            <button type="button" data-format="list" title="Elenco"><i class="fa-solid fa-list-ul" aria-hidden="true"></i></button>
+            <button type="button" data-format="quote" title="Citazione"><i class="fa-solid fa-quote-left" aria-hidden="true"></i></button>
+            <button type="button" data-format="code" title="Codice"><i class="fa-solid fa-code" aria-hidden="true"></i></button>
+            <button type="button" data-format="link" title="Link"><i class="fa-solid fa-link" aria-hidden="true"></i></button>
+            <button type="button" data-format="hr" title="Separatore"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+          </div>
+
+          <p class="alert alert--info hidden" id="wiki-ed-hint">
+            Il contenuto di questa pagina è generato dai Gradi: modificalo dal Pannello. Qui puoi cambiare solo titolo, gruppo, ordine e badge.
+          </p>
+
+          <div class="wiki-editor__split">
+            <textarea id="wiki-ed-contenuto" class="form-textarea wiki-editor__textarea" spellcheck="true" aria-label="Contenuto in Markdown"></textarea>
+            <div class="wiki-editor__preview" id="wiki-ed-preview" aria-label="Anteprima"></div>
+          </div>
+
+          <div class="wiki-editor__rev" id="wiki-ed-rev-wrap">
+            <label class="form-label" for="wiki-ed-revisioni">Cronologia</label>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <select id="wiki-ed-revisioni" class="form-select" style="flex:1;min-width:200px;"></select>
+              <button type="button" class="btn btn--ghost" id="wiki-ed-rev-carica"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>Carica versione</button>
+            </div>
+          </div>
+
+          <p class="pw-box__error" id="wiki-ed-error"></p>
+          <div class="wiki-editor__actions">
+            <button type="submit" class="btn btn--primary" id="wiki-ed-salva"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>Salva</button>
+            <button type="button" class="btn btn--ghost" id="wiki-ed-annulla"><i class="fa-solid fa-xmark" aria-hidden="true"></i>Annulla</button>
+            <button type="button" class="btn btn--danger hidden" id="wiki-ed-elimina"><i class="fa-solid fa-trash" aria-hidden="true"></i>Elimina pagina</button>
+          </div>
+        </form>
+      </section>
     </main>
 
   </div>
@@ -99,7 +181,7 @@
     <div class="footer__inner">
       <div class="footer__brand">
         <div class="footer__logo seal-container"></div>
-        <span class="footer__name">Archivio — La Setta del Semmen</span>
+        <span class="footer__name">Archivio | La Setta del Semmen</span>
       </div>
       <div class="footer__legal">
         CLASSIFICATO · SOLO MEMBRI INIZIATI
@@ -109,6 +191,7 @@
 
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/config.js"></script>
   <script src="js/supabase-client.js"></script>
