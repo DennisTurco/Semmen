@@ -100,6 +100,32 @@
     .evento-card__azioni .partecipa-btn { flex: 1 1 100%; justify-content: center; }
     .evento-card__azioni .btn:not(.partecipa-btn) { flex: 1 1 0; justify-content: center; white-space: nowrap; }
 
+    /* Invito a candidarsi: pulsante più grande, con un alone che pulsa */
+    .partecipa-btn--cta {
+      padding: 0.95rem 1.5rem;
+      font-size: var(--text-base, 1rem);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      animation: cta-pulse 2.4s ease-in-out infinite;
+    }
+    .partecipa-btn--cta i { font-size: 1.1em; }
+    .partecipa-btn--cta:hover { animation-play-state: paused; transform: translateY(-1px); }
+
+    @keyframes cta-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.55); }
+      50%      { box-shadow: 0 0 0 8px rgba(201, 168, 76, 0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .partecipa-btn--cta { animation: none; box-shadow: 0 0 18px -2px rgba(201, 168, 76, 0.6); }
+    }
+
+    /* Card di un evento a cui ci si può ancora candidare */
+    .evento-card--aperto { border-color: var(--border-gold); }
+
+    /* Già candidato: discreto, verde-oro per confermare */
+    .partecipa-btn--fatto { color: var(--gold); border-color: var(--border-gold); }
+
     .evento-card__iscritti {
       margin-top: 1rem;
       padding-top: 0.85rem;

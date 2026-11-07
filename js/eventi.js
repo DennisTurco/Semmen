@@ -145,15 +145,23 @@ function pulsanteStato(ev) {
     return { label: 'Iscrizioni non disponibili', disabled: true };
   }
   if (!currentProfile) {
-    return { label: 'Accedi per Partecipare', disabled: false, action: 'login' };
+    return { label: '<i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>Accedi e candidati', disabled: false, action: 'login' };
   }
   if (currentProfile.role === 'utente') {
     return { label: 'Serve il grado di Compagno', disabled: false, action: 'serve-grado' };
   }
   if (mieParteciazioni.has(ev.id)) {
-    return { label: 'Già Candidato ✓ — Ritira', disabled: false, action: 'ritira' };
+    return { label: '<i class="fa-solid fa-check" aria-hidden="true"></i>Sei candidato · Ritira', disabled: false, action: 'ritira' };
   }
-  return { label: 'Richiedi Partecipazione', disabled: false, action: 'candidati' };
+  return { label: '<i class="fa-solid fa-hand-point-up" aria-hidden="true"></i>Candidati ora', disabled: false, action: 'candidati' };
+}
+
+// Chi non è ancora candidato vede un pulsante grande e luminoso;
+// chi lo è già un pulsante discreto, per non invogliare a ritirarsi
+function classePulsante(action) {
+  if (action === 'candidati' || action === 'login') return 'btn--primary partecipa-btn--cta';
+  if (action === 'ritira')    return 'btn--ghost btn--sm partecipa-btn--fatto';
+  return 'btn--primary btn--sm';
 }
 
 function cardEvento(ev) {
@@ -161,7 +169,7 @@ function cardEvento(ev) {
   const passato = ev.stato === 'Passato';
   const calUrl = passato ? null : googleCalendarUrl(ev);
   return `
-    <div class="feature-card evento-card${passato ? ' evento-card--passato' : ''}" data-reveal style="cursor:default;">
+    <div class="feature-card evento-card${passato ? ' evento-card--passato' : ''}${btn.action === 'candidati' || btn.action === 'login' ? ' evento-card--aperto' : ''}" data-reveal style="cursor:default;">
       ${ev.immagine
         ? `<img class="evento-card__image" src="${ev.immagine}" alt="${ev.titolo}">`
         : `<div class="evento-card__image evento-card__image--placeholder">🕯️</div>`}
@@ -178,7 +186,7 @@ function cardEvento(ev) {
       <div class="evento-card__azioni">
         <button
           type="button"
-          class="btn btn--primary btn--sm partecipa-btn"
+          class="btn partecipa-btn ${classePulsante(btn.action)}"
           data-evento-id="${ev.id}"
           data-action="${btn.action || ''}"
           ${btn.disabled ? 'disabled' : ''}
