@@ -99,6 +99,47 @@ function calcolaStatoEvento(dataStr) {
   return 'In programma';
 }
 
+/* ── Google Calendar (usato da eventi.js e dettaglio-evento.js)
+   Link "template" di Google Calendar: apre l'evento precompilato e
+   l'utente lo salva con un clic (nessuna API/OAuth necessaria).
+   La colonna `data` è solo giorno, quindi l'evento è "tutto il giorno";
+   la durata è testo libero ("5-6 giorni", "In giornata"): se contiene
+   un numero di giorni si usa il massimo, altrimenti un giorno solo. */
+function giorniDaDurata(durata) {
+  if (!durata || !/giorn/i.test(durata)) return 1;
+  const numeri = (durata.match(/\d+/g) || []).map(Number).filter(n => n > 0);
+  return numeri.length ? Math.min(Math.max(...numeri), 60) : 1;
+}
+
+function ymd(d) {
+  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function googleCalendarUrl(ev) {
+  if (!ev.data) return null;
+  const [y, m, g] = ev.data.slice(0, 10).split('-').map(Number);
+  const inizio = new Date(y, m - 1, g);
+  if (isNaN(inizio)) return null;
+  const fine = new Date(inizio);
+  fine.setDate(fine.getDate() + giorniDaDurata(ev.durata)); // data di fine esclusiva
+
+  const dettagli = [
+    ev.descrizione,
+    ev.dataTesto ? `Quando: ${ev.dataTesto}` : null,
+    ev.durata ? `Durata: ${ev.durata}` : null,
+    `Info: ${urlSito('eventi.html')}`,
+  ].filter(Boolean).join('\n\n');
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: ev.titolo,
+    dates: `${ymd(inizio)}/${ymd(fine)}`,
+    details: dettagli,
+  });
+  if (ev.luogo) params.set('location', ev.luogo);
+  return `https://calendar.google.com/calendar/render?${params}`;
+}
+
 /* ── Testo sicuro dentro innerHTML ───────────────────────────────
    Per i dati scritti dagli utenti (nomi, titoli, descrizioni) che
    finiscono in un template HTML. */

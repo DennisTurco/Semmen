@@ -8,6 +8,7 @@
   <title>Eventi | La Setta del Semmen</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
     .evento-card {
       position: relative;
@@ -86,6 +87,55 @@
       flex-grow: 1;
     }
 
+    .evento-card--passato .evento-card__image { filter: grayscale(0.6); opacity: 0.75; }
+
+    .evento-card__calendar {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .evento-card__iscritti {
+      margin-top: 1rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .evento-card__iscritti-titolo {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .evento-card__iscritti-titolo strong { color: var(--gold); }
+
+    .evento-card__iscritti-lista {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .iscritto-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      background: var(--bg-elevated);
+    }
+
+    .iscritto-chip--io { border-color: var(--border-gold); color: var(--gold); }
+    .iscritto-chip--altri { color: var(--text-muted); border-style: dashed; }
+
+    .eventi-sezione { margin-top: 4rem; }
+    .eventi-sezione .section-header { margin-bottom: 2rem; }
+    .eventi-sezione .section-header__title { font-size: var(--text-3xl, 2rem); }
+
     .eventi-empty {
       text-align: center;
       padding: 4rem 2rem;
@@ -140,9 +190,25 @@
       </p>
     </div>
 
-    <div class="feature-grid" id="eventi-grid" style="margin-top:2rem;">
-      <!-- Popolato da JS con CONFIG.eventi -->
-    </div>
+    <section class="eventi-sezione" id="eventi-futuri-sezione">
+      <div class="section-header" data-reveal>
+        <span class="section-header__label">Calendario</span>
+        <h2 class="section-header__title">Prossimi Eventi</h2>
+      </div>
+      <div class="feature-grid" id="eventi-grid">
+        <!-- Popolato da JS -->
+      </div>
+    </section>
+
+    <section class="eventi-sezione hidden" id="eventi-passati-sezione">
+      <div class="section-header" data-reveal>
+        <span class="section-header__label">Storico</span>
+        <h2 class="section-header__title">Eventi Passati</h2>
+      </div>
+      <div class="feature-grid" id="eventi-passati-grid">
+        <!-- Popolato da JS -->
+      </div>
+    </section>
 
   </div>
 

@@ -34,7 +34,7 @@ let currentProfile = null;
 
   const { data: evento, error: eventoError } = await db()
     .from('eventi')
-    .select('id, titolo, data, data_testo, durata, luogo, organizzatore_id')
+    .select('id, titolo, data, data_testo, durata, luogo, descrizione, organizzatore_id')
     .eq('id', eventoId)
     .single();
 
@@ -65,6 +65,23 @@ let currentProfile = null;
   condividi.addEventListener('click', () => {
     condividiWhatsApp(`${evento.titolo} — ${evento.data_testo || formatData(evento.data)}\nAderisci o guarda le foto: ${urlSito(`dettaglio-evento.html#${evento.id}`)}`);
   });
+
+  if (calcolaStatoEvento(evento.data) !== 'Passato') {
+    const calUrl = googleCalendarUrl({
+      id: evento.id,
+      titolo: evento.titolo,
+      data: evento.data,
+      dataTesto: evento.data_testo,
+      durata: evento.durata,
+      luogo: evento.luogo,
+      descrizione: evento.descrizione,
+    });
+    const calBtn = document.getElementById('evento-calendar');
+    if (calUrl) {
+      calBtn.href = calUrl;
+      calBtn.classList.remove('hidden');
+    }
+  }
 
   loadGalleria();
   await loadPartecipanti();

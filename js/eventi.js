@@ -25,11 +25,16 @@ function formatData(iso) {
 const db = SemmenAuth.db;
 
 /* ── Stato pagina ───────────────────────────────────────────── */
-const grid = document.getElementById('eventi-grid');
+const grid         = document.getElementById('eventi-grid');
+const gridPassati  = document.getElementById('eventi-passati-grid');
+const sezPassati   = document.getElementById('eventi-passati-sezione');
 let eventi          = [];
 let eventiFromDb     = false;
 let currentProfile   = null;
 let mieParteciazioni = new Set();
+let iscrittiPerEvento = new Map();   // evento_id → [{ user_id, display_name, grado_simbolo }]
+
+const MAX_ISCRITTI_VISIBILI = 8;
 
 /* ── Caricamento dati ───────────────────────────────────────── */
 async function loadEventi() {
@@ -67,6 +72,67 @@ async function loadMiePartecipazioni() {
   return new Set((data || []).map(p => p.evento_id));
 }
 
+/* Gli iscritti si leggono dalla RPC evento_partecipanti() (SECURITY
+   DEFINER, solo Compagno+): un Utente semplice o un visitatore non li
+   vede, coerente con la pagina di dettaglio. Una chiamata per evento,
+   in parallelo: gli eventi sono pochi. */
+function puoVedereIscritti() {
+  return eventiFromDb && currentProfile && currentProfile.role !== 'utente';
+}
+
+async function loadIscritti(ids) {
+  const risultati = await Promise.all(ids.map(async id => {
+    const { data, error } = await db().rpc('evento_partecipanti', { p_evento_id: id });
+    if (error) { console.error('[Eventi] iscritti error:', error); return [id, null]; }
+    return [id, data || []];
+  }));
+  risultati.forEach(([id, lista]) => { if (lista) iscrittiPerEvento.set(id, lista); });
+}
+
+function bloccoIscritti(ev) {
+  if (!puoVedereIscritti()) return '';
+  return `<div data-iscritti="${ev.id}">${contenutoIscritti(ev)}</div>`;
+}
+
+// Aggiorna solo il riquadro iscritti, senza ridisegnare le card (che
+// rifarebbero l'animazione di comparsa)
+function aggiornaIscritti() {
+  document.querySelectorAll('[data-iscritti]').forEach(el => {
+    const ev = eventi.find(e => e.id === el.dataset.iscritti);
+    if (ev) el.innerHTML = contenutoIscritti(ev);
+  });
+}
+
+function contenutoIscritti(ev) {
+  const lista = iscrittiPerEvento.get(ev.id);
+  if (!lista) return '';
+
+  const passato = ev.stato === 'Passato';
+  if (lista.length === 0) {
+    return `<div class="evento-card__iscritti">
+      <p class="evento-card__iscritti-titolo">${passato ? 'Nessun partecipante' : 'Nessun iscritto — sii il primo'}</p>
+    </div>`;
+  }
+
+  const visibili = lista.slice(0, MAX_ISCRITTI_VISIBILI);
+  const altri = lista.length - visibili.length;
+  const chips = visibili.map(p => {
+    const io = p.user_id === currentProfile.id;
+    const nome = io ? 'Tu' : (p.display_name || 'Membro');
+    return `<span class="iscritto-chip${io ? ' iscritto-chip--io' : ''}">${p.grado_simbolo ? `<span aria-hidden="true">${escapeHtml(p.grado_simbolo)}</span>` : ''}${escapeHtml(nome)}</span>`;
+  }).join('');
+
+  return `<div class="evento-card__iscritti">
+    <p class="evento-card__iscritti-titolo">👥 <strong>${lista.length}</strong> ${passato
+      ? (lista.length === 1 ? 'partecipante' : 'partecipanti')
+      : (lista.length === 1 ? 'iscritto' : 'iscritti')}</p>
+    <div class="evento-card__iscritti-lista">
+      ${chips}
+      ${altri > 0 ? `<a href="dettaglio-evento.html#${ev.id}" class="iscritto-chip iscritto-chip--altri">+${altri} altri</a>` : ''}
+    </div>
+  </div>`;
+}
+
 /* ── Render griglia eventi ──────────────────────────────────── */
 function pulsanteStato(ev) {
   if (ev.stato === 'Passato') {
@@ -87,18 +153,12 @@ function pulsanteStato(ev) {
   return { label: 'Richiedi Partecipazione', disabled: false, action: 'candidati' };
 }
 
-function render() {
-  if (eventi.length === 0) {
-    grid.innerHTML = `<div class="eventi-empty">
-      Nessun evento in calendario.<br>Aggiungili dal <a href="pannello.html">Pannello</a>.
-    </div>`;
-    return;
-  }
-
-  grid.innerHTML = eventi.map(ev => {
-    const btn = pulsanteStato(ev);
-    return `
-    <div class="feature-card evento-card" data-reveal style="cursor:default;">
+function cardEvento(ev) {
+  const btn = pulsanteStato(ev);
+  const passato = ev.stato === 'Passato';
+  const calUrl = passato ? null : googleCalendarUrl(ev);
+  return `
+    <div class="feature-card evento-card${passato ? ' evento-card--passato' : ''}" data-reveal style="cursor:default;">
       ${ev.immagine
         ? `<img class="evento-card__image" src="${ev.immagine}" alt="${ev.titolo}">`
         : `<div class="evento-card__image evento-card__image--placeholder">🕯️</div>`}
@@ -111,6 +171,7 @@ function render() {
         ${ev.luogo ? `<span>📍 ${ev.luogo}</span>` : ''}
       </div>
       <p class="evento-card__desc">${ev.descrizione || ''}</p>
+      ${bloccoIscritti(ev)}
       <button
         type="button"
         class="btn btn--primary partecipa-btn"
@@ -119,13 +180,32 @@ function render() {
         data-action="${btn.action || ''}"
         ${btn.disabled ? 'disabled' : ''}
       >${btn.label}</button>
-      ${eventiFromDb && currentProfile && currentProfile.role !== 'utente'
-        ? `<a href="dettaglio-evento.html#${ev.id}" class="btn btn--outline" style="width:100%;margin-top:0.5rem;">Vedi Partecipanti</a>`
+      ${calUrl
+        ? `<a href="${escapeHtml(calUrl)}" target="_blank" rel="noopener" class="btn btn--outline evento-card__calendar">
+            <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i> Salva in Google Calendar
+          </a>`
+        : ''}
+      ${puoVedereIscritti()
+        ? `<a href="dettaglio-evento.html#${ev.id}" class="btn btn--outline" style="width:100%;margin-top:0.5rem;">${passato ? 'Partecipanti e Foto' : 'Vedi Partecipanti'}</a>`
         : ''}
     </div>`;
-  }).join('');
+}
 
-  grid.querySelectorAll('.partecipa-btn').forEach(el => {
+function render() {
+  const futuri  = eventi.filter(ev => ev.stato !== 'Passato');
+  // Passati: dal più recente al più vecchio
+  const passati = eventi.filter(ev => ev.stato === 'Passato').reverse();
+
+  grid.innerHTML = futuri.length
+    ? futuri.map(cardEvento).join('')
+    : `<div class="eventi-empty">
+        Nessun evento in programma.${eventi.length === 0 ? '<br>Aggiungili dal <a href="pannello.html">Pannello</a>.' : ''}
+      </div>`;
+
+  gridPassati.innerHTML = passati.map(cardEvento).join('');
+  sezPassati.classList.toggle('hidden', passati.length === 0);
+
+  document.querySelectorAll('.partecipa-btn').forEach(el => {
     el.addEventListener('click', () => handleAzione(el.dataset.eventoId, el.dataset.action));
   });
 }
@@ -161,6 +241,7 @@ async function ritiraPartecipazione(ev) {
     .eq('user_id', currentProfile.id);
   if (error) { alert(error.message); return; }
   mieParteciazioni.delete(ev.id);
+  await loadIscritti([ev.id]);
   render();
 }
 
@@ -229,6 +310,7 @@ partecipaForm.addEventListener('submit', async e => {
   mieParteciazioni.add(selectedEvento.id);
   partecipaForm.classList.add('hidden');
   partecipaSuccess.classList.remove('hidden');
+  await loadIscritti([selectedEvento.id]);
   render();
 });
 
@@ -248,4 +330,11 @@ partecipaForm.addEventListener('submit', async e => {
 
   [eventi, mieParteciazioni] = await Promise.all([eventiPromise, partecipazioniPromise]);
   render();
+
+  // Gli iscritti arrivano dopo: la pagina è già visibile, poi le card
+  // si aggiornano con i nomi.
+  if (puoVedereIscritti()) {
+    await loadIscritti(eventi.map(ev => ev.id));
+    aggiornaIscritti();
+  }
 })();
