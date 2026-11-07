@@ -96,6 +96,8 @@
     @media (max-width: 700px) {
       .entry-form__grid { grid-template-columns: 1fr; }
     }
+    /* Data + ora affiancate nello stesso campo */
+    .evento-dataora { display: grid; grid-template-columns: 1fr 7.5rem; gap: 0.5rem; }
   </style>
 </head>
 <body>
@@ -165,18 +167,24 @@
             </div>
             <div class="form-group">
               <label class="form-label" for="evento-data">Dal (determina anche lo Stato)</label>
-              <input type="date" id="evento-data" class="form-input">
-              <p class="form-hint">Lo stato (In programma / Imminente / Passato) si calcola da solo in base alle date.</p>
+              <div class="evento-dataora">
+                <input type="date" id="evento-data" class="form-input" aria-label="Data di inizio">
+                <input type="time" id="evento-ora-inizio" class="form-input" aria-label="Ora di inizio">
+              </div>
+              <p class="form-hint">Lo stato (In programma / Imminente / Passato) si calcola da solo in base alle date. Ora facoltativa: senza, l'evento dura tutto il giorno.</p>
             </div>
             <div class="form-group">
               <label class="form-label" for="evento-data-fine">Al (facoltativo)</label>
-              <input type="date" id="evento-data-fine" class="form-input">
-              <p class="form-hint" id="evento-durata-hint">Lascia vuoto per un evento di un giorno solo.</p>
+              <div class="evento-dataora">
+                <input type="date" id="evento-data-fine" class="form-input" aria-label="Data di fine">
+                <input type="time" id="evento-ora-fine" class="form-input" aria-label="Ora di fine">
+              </div>
+              <p class="form-hint" id="evento-durata-hint">Data vuota = stesso giorno dell'inizio.</p>
             </div>
             <div class="form-group" style="grid-column:1/-1;">
               <label class="form-label" for="evento-data-testo">Data mostrata (testo libero, facoltativo)</label>
               <input type="text" id="evento-data-testo" class="form-input" placeholder="es. Ottobre 2026 — data da definire">
-              <p class="form-hint">Se vuoto si mostra l'intervallo, es. "12 → 15 marzo 2026".</p>
+              <p class="form-hint">Se vuoto si mostra l'intervallo, es. "12 marzo 2026, 21:00 → 23:30".</p>
             </div>
             <div class="form-group">
               <label class="form-label" for="evento-luogo">Luogo</label>

@@ -116,9 +116,45 @@ function giorniEvento(ev) {
   return Math.round((fine - inizio) / 86400000) + 1;
 }
 
+// "21:00:00" (colonna time) → "21:00"
+function hhmm(ora) {
+  return ora ? String(ora).slice(0, 5) : null;
+}
+
+// Inizio e fine come Date con orario, solo se l'evento ha un'ora di
+// inizio. Senza ora di fine dura 1 ora; se la fine cade prima
+// dell'inizio (es. 22:00 → 02:00 nello stesso giorno) finisce il
+// giorno dopo.
+function intervalloOrario(ev) {
+  const giorno = dataLocale(ev.data);
+  const oraInizio = hhmm(ev.oraInizio);
+  if (!giorno || !oraInizio) return null;
+  const conOra = (d, ora) => {
+    const [h, m] = ora.split(':').map(Number);
+    const r = new Date(d); r.setHours(h, m, 0, 0); return r;
+  };
+  const inizio = conOra(giorno, oraInizio);
+  let fine;
+  if (hhmm(ev.oraFine)) {
+    fine = conOra(dataLocale(ev.dataFine) || giorno, hhmm(ev.oraFine));
+    if (fine <= inizio) fine.setDate(fine.getDate() + 1);
+  } else {
+    fine = new Date(inizio.getTime() + 3600000);
+  }
+  return { inizio, fine };
+}
+
 // Testo della durata mostrato nelle card: dall'intervallo se c'è,
 // altrimenti il vecchio testo libero
 function durataEvento(ev) {
+  const orario = intervalloOrario(ev);
+  if (orario && hhmm(ev.oraFine)) {
+    const minuti = Math.round((orario.fine - orario.inizio) / 60000);
+    if (minuti < 24 * 60) {
+      const h = Math.floor(minuti / 60), m = minuti % 60;
+      return [h ? `${h} ${h === 1 ? 'ora' : 'ore'}` : '', m ? `${m} min` : ''].filter(Boolean).join(' ');
+    }
+  }
   const giorni = giorniEvento(ev);
   if (giorni === null) return ev.durata || null;
   return giorni === 1 ? 'In giornata' : `${giorni} giorni`;
@@ -128,8 +164,20 @@ function durataEvento(ev) {
 function dataEventoTesto(ev) {
   if (ev.dataTesto) return ev.dataTesto;
   if (!ev.data) return 'Data da definire';
+  const oraInizio = hhmm(ev.oraInizio), oraFine = hhmm(ev.oraFine);
   const giorni = giorniEvento(ev);
-  if (!giorni || giorni === 1) return formatDataLunga(ev.data);
+
+  if (!giorni || giorni === 1) {
+    // "12 marzo 2026, 21:00 → 23:30" oppure "12 marzo 2026, ore 21:00"
+    const orario = oraInizio ? (oraFine ? `, ${oraInizio} → ${oraFine}` : `, ore ${oraInizio}`) : '';
+    return formatDataLunga(ev.data) + orario;
+  }
+
+  // Più giorni con orari: "12 marzo 2026, 18:00 → 15 marzo 2026, 12:00"
+  if (oraInizio) {
+    return `${formatDataLunga(ev.data)}, ${oraInizio} → ${formatDataLunga(ev.dataFine)}${oraFine ? `, ${oraFine}` : ''}`;
+  }
+
   const a = dataLocale(ev.data), b = dataLocale(ev.dataFine);
   const mese = d => d.toLocaleDateString('it-IT', { month: 'long' });
   // "12 → 15 marzo 2026", "28 febbraio → 3 marzo 2026", altrimenti per esteso
@@ -146,9 +194,10 @@ function formatDataLunga(iso) {
 /* ── Google Calendar (usato da eventi.js e dettaglio-evento.js)
    Link "template" di Google Calendar: apre l'evento precompilato e
    l'utente lo salva con un clic (nessuna API/OAuth necessaria).
-   Le date sono solo giorno, quindi l'evento è "tutto il giorno" e va
-   da `data` a `dataFine` inclusa. Per i vecchi eventi senza data di
-   fine si prova a ricavare i giorni dal testo libero ("5-6 giorni"). */
+   Con l'ora di inizio l'evento ha orari precisi (fuso Europe/Rome);
+   senza, è "tutto il giorno" da `data` a `dataFine` inclusa. Per i
+   vecchi eventi senza data di fine si prova a ricavare i giorni dal
+   testo libero ("5-6 giorni"). */
 function giorniDaDurata(durata) {
   if (!durata || !/giorn/i.test(durata)) return 1;
   const numeri = (durata.match(/\d+/g) || []).map(Number).filter(n => n > 0);
@@ -159,11 +208,23 @@ function ymd(d) {
   return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 }
 
+function ymdhms(d) {
+  return `${ymd(d)}T${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}00`;
+}
+
 function googleCalendarUrl(ev) {
-  const inizio = dataLocale(ev.data);
-  if (!inizio) return null;
-  const fine = new Date(inizio);
-  fine.setDate(fine.getDate() + (giorniEvento(ev) || giorniDaDurata(ev.durata))); // data di fine esclusiva
+  const giorno = dataLocale(ev.data);
+  if (!giorno) return null;
+
+  let dates;
+  const orario = intervalloOrario(ev);
+  if (orario) {
+    dates = `${ymdhms(orario.inizio)}/${ymdhms(orario.fine)}`;
+  } else {
+    const fine = new Date(giorno);
+    fine.setDate(fine.getDate() + (giorniEvento(ev) || giorniDaDurata(ev.durata))); // data di fine esclusiva
+    dates = `${ymd(giorno)}/${ymd(fine)}`;
+  }
 
   const dettagli = [
     ev.descrizione,
@@ -175,9 +236,10 @@ function googleCalendarUrl(ev) {
   const params = new URLSearchParams({
     action: 'TEMPLATE',
     text: ev.titolo,
-    dates: `${ymd(inizio)}/${ymd(fine)}`,
+    dates,
     details: dettagli,
   });
+  if (orario) params.set('ctz', 'Europe/Rome');
   if (ev.luogo) params.set('location', ev.luogo);
   return `https://calendar.google.com/calendar/render?${params}`;
 }

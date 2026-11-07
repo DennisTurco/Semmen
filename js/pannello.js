@@ -133,7 +133,7 @@
       <tr>
         <td>${ev.titolo}</td>
         <td>${calcolaStatoEvento(ev.data, ev.data_fine)}</td>
-        <td>${ev.data ? escapeHtml(dataEventoTesto({ data: ev.data, dataFine: ev.data_fine, dataTesto: ev.data_testo })) : '—'}</td>
+        <td>${ev.data ? escapeHtml(dataEventoTesto({ data: ev.data, dataFine: ev.data_fine, oraInizio: ev.ora_inizio, oraFine: ev.ora_fine, dataTesto: ev.data_testo })) : '—'}</td>
         <td>${organizzatoreLabel(ev.organizzatore_id)}</td>
         <td><a href="dettaglio-evento.html#${ev.id}">${counts[ev.id] || 0}</a></td>
         <td class="row-actions">
@@ -194,6 +194,8 @@
     document.getElementById('evento-data').value          = ev.data || '';
     document.getElementById('evento-data-testo').value    = ev.data_testo || '';
     eventoDataFineEl.value                                 = ev.data_fine || '';
+    eventoOraInizioEl.value                                = hhmm(ev.ora_inizio) || '';
+    eventoOraFineEl.value                                  = hhmm(ev.ora_fine) || '';
     aggiornaDurataHint();
     document.getElementById('evento-luogo').value         = ev.luogo || '';
     eventoImmagineEl.value                                 = ev.immagine || '';
@@ -207,17 +209,31 @@
 
   const eventoDataEl     = document.getElementById('evento-data');
   const eventoDataFineEl = document.getElementById('evento-data-fine');
+  const eventoOraInizioEl = document.getElementById('evento-ora-inizio');
+  const eventoOraFineEl   = document.getElementById('evento-ora-fine');
   const eventoDurataHint = document.getElementById('evento-durata-hint');
   const DURATA_HINT_DEFAULT = eventoDurataHint.textContent;
 
-  // La fine non può precedere l'inizio; l'hint mostra i giorni calcolati
+  function eventoDalModulo() {
+    return {
+      data: eventoDataEl.value,
+      dataFine: eventoDataFineEl.value,
+      oraInizio: eventoOraInizioEl.value,
+      oraFine: eventoOraFineEl.value,
+    };
+  }
+
+  // La fine non può precedere l'inizio; l'hint mostra la durata calcolata
   function aggiornaDurataHint() {
     eventoDataFineEl.min = eventoDataEl.value || '';
-    const giorni = giorniEvento({ data: eventoDataEl.value, dataFine: eventoDataFineEl.value });
-    eventoDurataHint.textContent = giorni ? `Durata: ${durataEvento({ data: eventoDataEl.value, dataFine: eventoDataFineEl.value })}.` : DURATA_HINT_DEFAULT;
+    const ev = eventoDalModulo();
+    const haIntervallo = ev.data && (giorniEvento(ev) || (ev.oraInizio && ev.oraFine));
+    eventoDurataHint.textContent = haIntervallo
+      ? `${dataEventoTesto(ev)} · ${durataEvento(ev)}.`
+      : DURATA_HINT_DEFAULT;
   }
-  eventoDataEl.addEventListener('change', aggiornaDurataHint);
-  eventoDataFineEl.addEventListener('change', aggiornaDurataHint);
+  [eventoDataEl, eventoDataFineEl, eventoOraInizioEl, eventoOraFineEl]
+    .forEach(el => el.addEventListener('change', aggiornaDurataHint));
 
   function resetEventoForm() {
     eventoForm.reset();
@@ -248,16 +264,25 @@
     if (dataFine && !dataInizio) { eventoError.textContent = 'Inserisci anche la data di inizio.'; return; }
     if (dataFine && dataFine < dataInizio) { eventoError.textContent = 'La data di fine non può precedere quella di inizio.'; return; }
     if (dataFine === dataInizio) dataFine = null;
+    const oraInizio = eventoOraInizioEl.value || null;
+    const oraFine   = eventoOraFineEl.value || null;
+    if (oraInizio && !dataInizio) { eventoError.textContent = 'Inserisci anche la data di inizio.'; return; }
+    if (oraFine && !oraInizio) { eventoError.textContent = 'Inserisci anche l\'ora di inizio.'; return; }
+    if (dataFine && oraInizio && oraFine && `${dataFine}T${oraFine}` <= `${dataInizio}T${oraInizio}`) {
+      eventoError.textContent = 'La fine non può precedere l\'inizio.'; return;
+    }
 
     const payload = {
       titolo:           document.getElementById('evento-titolo').value.trim(),
       data:              dataInizio,
       data_fine:         dataFine,
+      ora_inizio:        oraInizio,
+      ora_fine:          oraFine,
       stato:             calcolaStatoEvento(dataInizio, dataFine),
       data_testo:        document.getElementById('evento-data-testo').value.trim() || null,
-      // La durata ora deriva dalle date: il vecchio testo libero si azzera
-      // appena c'è un intervallo, altrimenti resta com'era
-      ...(dataFine ? { durata: null } : {}),
+      // La durata ora deriva da date e orari: il vecchio testo libero si
+      // azzera appena c'è un intervallo, altrimenti resta com'era
+      ...(dataFine || oraInizio ? { durata: null } : {}),
       luogo:             document.getElementById('evento-luogo').value.trim() || null,
       immagine:          document.getElementById('evento-immagine').value.trim() || null,
       credito_immagine:  document.getElementById('evento-credito').value.trim() || null,

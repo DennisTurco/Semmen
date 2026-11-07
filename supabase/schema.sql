@@ -280,6 +280,8 @@ create table if not exists semmen.eventi (
   titolo           text not null,
   data             date,
   data_fine        date,           -- ultimo giorno (incluso); null = un giorno solo
+  ora_inizio       time,           -- null = evento "tutto il giorno"
+  ora_fine         time,
   data_testo       text,
   durata           text,
   luogo            text,
@@ -292,7 +294,9 @@ create table if not exists semmen.eventi (
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now(),
   constraint eventi_data_fine_check
-    check (data_fine is null or (data is not null and data_fine >= data))
+    check (data_fine is null or (data is not null and data_fine >= data)),
+  constraint eventi_ora_fine_check
+    check (ora_fine is null or ora_inizio is not null)
 );
 
 alter table semmen.eventi enable row level security;

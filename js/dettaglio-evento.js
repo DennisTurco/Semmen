@@ -34,7 +34,7 @@ let currentProfile = null;
 
   const { data: evento, error: eventoError } = await db()
     .from('eventi')
-    .select('id, titolo, data, data_fine, data_testo, durata, luogo, descrizione, organizzatore_id')
+    .select('id, titolo, data, data_fine, ora_inizio, ora_fine, data_testo, durata, luogo, descrizione, organizzatore_id')
     .eq('id', eventoId)
     .single();
 
@@ -52,6 +52,8 @@ let currentProfile = null;
     titolo: evento.titolo,
     data: evento.data,
     dataFine: evento.data_fine,
+    oraInizio: evento.ora_inizio,
+    oraFine: evento.ora_fine,
     dataTesto: evento.data_testo,
     durata: evento.durata,
     luogo: evento.luogo,

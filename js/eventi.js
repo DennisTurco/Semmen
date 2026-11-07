@@ -47,6 +47,8 @@ async function loadEventi() {
         titolo: ev.titolo,
         data: ev.data,
         dataFine: ev.data_fine,
+        oraInizio: ev.ora_inizio,
+        oraFine: ev.ora_fine,
         dataTesto: ev.data_testo,
         durata: ev.durata,
         luogo: ev.luogo,
