@@ -89,10 +89,16 @@
 
     .evento-card--passato .evento-card__image { filter: grayscale(0.6); opacity: 0.75; }
 
-    .evento-card__calendar {
-      width: 100%;
-      margin-top: 0.5rem;
+    .evento-card__azioni {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
     }
+
+    /* Il pulsante principale occupa la riga, gli altri si affiancano sotto */
+    .evento-card__azioni .partecipa-btn { flex: 1 1 100%; justify-content: center; }
+    .evento-card__azioni .btn:not(.partecipa-btn) { flex: 1 1 0; justify-content: center; white-space: nowrap; }
 
     .evento-card__iscritti {
       margin-top: 1rem;

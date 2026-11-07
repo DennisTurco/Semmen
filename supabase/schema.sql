@@ -279,6 +279,7 @@ create table if not exists semmen.eventi (
   id               uuid primary key default gen_random_uuid(),
   titolo           text not null,
   data             date,
+  data_fine        date,           -- ultimo giorno (incluso); null = un giorno solo
   data_testo       text,
   durata           text,
   luogo            text,
@@ -289,7 +290,9 @@ create table if not exists semmen.eventi (
                      check (stato in ('In programma', 'Imminente', 'Passato')),
   organizzatore_id uuid references semmen.profiles (id) on delete set null,
   created_at       timestamptz not null default now(),
-  updated_at       timestamptz not null default now()
+  updated_at       timestamptz not null default now(),
+  constraint eventi_data_fine_check
+    check (data_fine is null or (data is not null and data_fine >= data))
 );
 
 alter table semmen.eventi enable row level security;

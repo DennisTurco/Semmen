@@ -164,17 +164,19 @@
               <input type="text" id="evento-titolo" class="form-input" required>
             </div>
             <div class="form-group">
-              <label class="form-label" for="evento-data">Data (determina anche lo Stato)</label>
+              <label class="form-label" for="evento-data">Dal (determina anche lo Stato)</label>
               <input type="date" id="evento-data" class="form-input">
-              <p class="form-hint">Lo stato (In programma / Imminente / Passato) si calcola da solo in base a questa data.</p>
+              <p class="form-hint">Lo stato (In programma / Imminente / Passato) si calcola da solo in base alle date.</p>
             </div>
             <div class="form-group">
-              <label class="form-label" for="evento-data-testo">Data mostrata (testo libero)</label>
+              <label class="form-label" for="evento-data-fine">Al (facoltativo)</label>
+              <input type="date" id="evento-data-fine" class="form-input">
+              <p class="form-hint" id="evento-durata-hint">Lascia vuoto per un evento di un giorno solo.</p>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label" for="evento-data-testo">Data mostrata (testo libero, facoltativo)</label>
               <input type="text" id="evento-data-testo" class="form-input" placeholder="es. Ottobre 2026 — data da definire">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="evento-durata">Durata</label>
-              <input type="text" id="evento-durata" class="form-input" placeholder="es. 5-6 giorni">
+              <p class="form-hint">Se vuoto si mostra l'intervallo, es. "12 → 15 marzo 2026".</p>
             </div>
             <div class="form-group">
               <label class="form-label" for="evento-luogo">Luogo</label>

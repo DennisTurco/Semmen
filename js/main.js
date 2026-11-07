@@ -85,26 +85,70 @@ document.querySelectorAll('.seal-container').forEach(el => {
 // stato non richiede mai un aggiornamento manuale.
 const SOGLIA_IMMINENTE_GIORNI = 7;
 
-function calcolaStatoEvento(dataStr) {
+function calcolaStatoEvento(dataStr, dataFineStr) {
   if (!dataStr) return 'In programma';
   const oggi = new Date();
   oggi.setHours(0, 0, 0, 0);
-  const data = new Date(dataStr);
-  if (isNaN(data)) return 'In programma';
-  data.setHours(0, 0, 0, 0);
+  const data = dataLocale(dataStr);
+  if (!data) return 'In programma';
+  const fine = dataLocale(dataFineStr) || data;
 
+  if (fine < oggi) return 'Passato';
+  // Evento di più giorni già iniziato: è in corso, quindi "Imminente"
   const diffGiorni = Math.round((data - oggi) / 86400000);
-  if (diffGiorni < 0) return 'Passato';
   if (diffGiorni <= SOGLIA_IMMINENTE_GIORNI) return 'Imminente';
   return 'In programma';
+}
+
+// "2026-03-12" → Date a mezzanotte locale (new Date(iso) userebbe UTC)
+function dataLocale(iso) {
+  if (!iso) return null;
+  const [y, m, g] = String(iso).slice(0, 10).split('-').map(Number);
+  const d = new Date(y, m - 1, g);
+  return isNaN(d) ? null : d;
+}
+
+// Numero di giorni dell'evento (estremi inclusi), null se manca la fine
+function giorniEvento(ev) {
+  const inizio = dataLocale(ev.data);
+  const fine = dataLocale(ev.dataFine);
+  if (!inizio || !fine || fine < inizio) return null;
+  return Math.round((fine - inizio) / 86400000) + 1;
+}
+
+// Testo della durata mostrato nelle card: dall'intervallo se c'è,
+// altrimenti il vecchio testo libero
+function durataEvento(ev) {
+  const giorni = giorniEvento(ev);
+  if (giorni === null) return ev.durata || null;
+  return giorni === 1 ? 'In giornata' : `${giorni} giorni`;
+}
+
+// Data mostrata: testo libero se impostato, altrimenti "dal … al …"
+function dataEventoTesto(ev) {
+  if (ev.dataTesto) return ev.dataTesto;
+  if (!ev.data) return 'Data da definire';
+  const giorni = giorniEvento(ev);
+  if (!giorni || giorni === 1) return formatDataLunga(ev.data);
+  const a = dataLocale(ev.data), b = dataLocale(ev.dataFine);
+  const mese = d => d.toLocaleDateString('it-IT', { month: 'long' });
+  // "12 → 15 marzo 2026", "28 febbraio → 3 marzo 2026", altrimenti per esteso
+  if (a.getFullYear() !== b.getFullYear()) return `${formatDataLunga(ev.data)} → ${formatDataLunga(ev.dataFine)}`;
+  const da = a.getMonth() === b.getMonth() ? `${a.getDate()}` : `${a.getDate()} ${mese(a)}`;
+  return `${da} → ${formatDataLunga(ev.dataFine)}`;
+}
+
+function formatDataLunga(iso) {
+  const d = dataLocale(iso);
+  return d ? d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
 }
 
 /* ── Google Calendar (usato da eventi.js e dettaglio-evento.js)
    Link "template" di Google Calendar: apre l'evento precompilato e
    l'utente lo salva con un clic (nessuna API/OAuth necessaria).
-   La colonna `data` è solo giorno, quindi l'evento è "tutto il giorno";
-   la durata è testo libero ("5-6 giorni", "In giornata"): se contiene
-   un numero di giorni si usa il massimo, altrimenti un giorno solo. */
+   Le date sono solo giorno, quindi l'evento è "tutto il giorno" e va
+   da `data` a `dataFine` inclusa. Per i vecchi eventi senza data di
+   fine si prova a ricavare i giorni dal testo libero ("5-6 giorni"). */
 function giorniDaDurata(durata) {
   if (!durata || !/giorn/i.test(durata)) return 1;
   const numeri = (durata.match(/\d+/g) || []).map(Number).filter(n => n > 0);
@@ -116,17 +160,15 @@ function ymd(d) {
 }
 
 function googleCalendarUrl(ev) {
-  if (!ev.data) return null;
-  const [y, m, g] = ev.data.slice(0, 10).split('-').map(Number);
-  const inizio = new Date(y, m - 1, g);
-  if (isNaN(inizio)) return null;
+  const inizio = dataLocale(ev.data);
+  if (!inizio) return null;
   const fine = new Date(inizio);
-  fine.setDate(fine.getDate() + giorniDaDurata(ev.durata)); // data di fine esclusiva
+  fine.setDate(fine.getDate() + (giorniEvento(ev) || giorniDaDurata(ev.durata))); // data di fine esclusiva
 
   const dettagli = [
     ev.descrizione,
     ev.dataTesto ? `Quando: ${ev.dataTesto}` : null,
-    ev.durata ? `Durata: ${ev.durata}` : null,
+    durataEvento(ev) ? `Durata: ${durataEvento(ev)}` : null,
     `Info: ${urlSito('eventi.html')}`,
   ].filter(Boolean).join('\n\n');
 

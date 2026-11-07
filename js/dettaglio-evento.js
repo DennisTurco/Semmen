@@ -34,7 +34,7 @@ let currentProfile = null;
 
   const { data: evento, error: eventoError } = await db()
     .from('eventi')
-    .select('id, titolo, data, data_testo, durata, luogo, descrizione, organizzatore_id')
+    .select('id, titolo, data, data_fine, data_testo, durata, luogo, descrizione, organizzatore_id')
     .eq('id', eventoId)
     .single();
 
@@ -46,6 +46,18 @@ let currentProfile = null;
 
   document.getElementById('evento-titolo').textContent = evento.titolo;
 
+  // Stesso formato usato da eventi.js per le funzioni comuni di main.js
+  const ev = {
+    id: evento.id,
+    titolo: evento.titolo,
+    data: evento.data,
+    dataFine: evento.data_fine,
+    dataTesto: evento.data_testo,
+    durata: evento.durata,
+    luogo: evento.luogo,
+    descrizione: evento.descrizione,
+  };
+
   let organizzatoreLabel = null;
   if (evento.organizzatore_id) {
     const { data: utenti } = await db().rpc('utenti_assegnabili');
@@ -54,8 +66,8 @@ let currentProfile = null;
   }
 
   document.getElementById('evento-meta').textContent = [
-    evento.data_testo || formatData(evento.data),
-    evento.durata,
+    dataEventoTesto(ev),
+    durataEvento(ev),
     evento.luogo,
     organizzatoreLabel,
   ].filter(Boolean).join(' · ');
@@ -63,19 +75,11 @@ let currentProfile = null;
   const condividi = document.getElementById('evento-condividi');
   condividi.classList.remove('hidden');
   condividi.addEventListener('click', () => {
-    condividiWhatsApp(`${evento.titolo} — ${evento.data_testo || formatData(evento.data)}\nAderisci o guarda le foto: ${urlSito(`dettaglio-evento.html#${evento.id}`)}`);
+    condividiWhatsApp(`${evento.titolo} — ${dataEventoTesto(ev)}\nAderisci o guarda le foto: ${urlSito(`dettaglio-evento.html#${evento.id}`)}`);
   });
 
-  if (calcolaStatoEvento(evento.data) !== 'Passato') {
-    const calUrl = googleCalendarUrl({
-      id: evento.id,
-      titolo: evento.titolo,
-      data: evento.data,
-      dataTesto: evento.data_testo,
-      durata: evento.durata,
-      luogo: evento.luogo,
-      descrizione: evento.descrizione,
-    });
+  if (calcolaStatoEvento(evento.data, evento.data_fine) !== 'Passato') {
+    const calUrl = googleCalendarUrl(ev);
     const calBtn = document.getElementById('evento-calendar');
     if (calUrl) {
       calBtn.href = calUrl;

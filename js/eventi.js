@@ -46,19 +46,20 @@ async function loadEventi() {
         id: ev.id,
         titolo: ev.titolo,
         data: ev.data,
+        dataFine: ev.data_fine,
         dataTesto: ev.data_testo,
         durata: ev.durata,
         luogo: ev.luogo,
         descrizione: ev.descrizione,
         immagine: ev.immagine,
         creditoImmagine: ev.credito_immagine,
-        stato: calcolaStatoEvento(ev.data),
+        stato: calcolaStatoEvento(ev.data, ev.data_fine),
       }));
     }
   }
   eventiFromDb = false;
   return (CONFIG.eventi || [])
-    .map((ev, i) => ({ id: `local-${i}`, ...ev, stato: calcolaStatoEvento(ev.data) }))
+    .map((ev, i) => ({ id: `local-${i}`, ...ev, stato: calcolaStatoEvento(ev.data, ev.dataFine) }))
     .sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 }
 
@@ -166,28 +167,29 @@ function cardEvento(ev) {
       <span class="evento-status ${statoClass(ev.stato)}"><span class="dot"></span>${ev.stato || 'In programma'}</span>
       <h3 class="feature-card__title">${ev.titolo}</h3>
       <div class="evento-card__meta">
-        <span>📅 ${ev.dataTesto || formatData(ev.data)}</span>
-        ${ev.durata ? `<span>⏱ ${ev.durata}</span>` : ''}
+        <span>📅 ${escapeHtml(dataEventoTesto(ev))}</span>
+        ${durataEvento(ev) ? `<span>⏱ ${escapeHtml(durataEvento(ev))}</span>` : ''}
         ${ev.luogo ? `<span>📍 ${ev.luogo}</span>` : ''}
       </div>
       <p class="evento-card__desc">${ev.descrizione || ''}</p>
       ${bloccoIscritti(ev)}
-      <button
-        type="button"
-        class="btn btn--primary partecipa-btn"
-        style="width:100%;margin-top:1.25rem;"
-        data-evento-id="${ev.id}"
-        data-action="${btn.action || ''}"
-        ${btn.disabled ? 'disabled' : ''}
-      >${btn.label}</button>
-      ${calUrl
-        ? `<a href="${escapeHtml(calUrl)}" target="_blank" rel="noopener" class="btn btn--outline evento-card__calendar">
-            <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i> Salva in Google Calendar
-          </a>`
-        : ''}
-      ${puoVedereIscritti()
-        ? `<a href="dettaglio-evento.html#${ev.id}" class="btn btn--outline" style="width:100%;margin-top:0.5rem;">${passato ? 'Partecipanti e Foto' : 'Vedi Partecipanti'}</a>`
-        : ''}
+      <div class="evento-card__azioni">
+        <button
+          type="button"
+          class="btn btn--primary btn--sm partecipa-btn"
+          data-evento-id="${ev.id}"
+          data-action="${btn.action || ''}"
+          ${btn.disabled ? 'disabled' : ''}
+        >${btn.label}</button>
+        ${calUrl
+          ? `<a href="${escapeHtml(calUrl)}" target="_blank" rel="noopener" class="btn btn--outline btn--sm" title="Salva in Google Calendar">
+              <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>Calendar
+            </a>`
+          : ''}
+        ${puoVedereIscritti()
+          ? `<a href="dettaglio-evento.html#${ev.id}" class="btn btn--ghost btn--sm">${passato ? 'Partecipanti e Foto' : 'Partecipanti'}</a>`
+          : ''}
+      </div>
     </div>`;
 }
 
@@ -260,7 +262,7 @@ let selectedEvento = null;
 
 function openPartecipaModal(evento) {
   selectedEvento = evento;
-  partecipaEventoNome.textContent = `${evento.titolo} — ${evento.dataTesto || formatData(evento.data)}`;
+  partecipaEventoNome.textContent = `${evento.titolo} — ${dataEventoTesto(evento)}`;
   partecipaUtente.textContent = currentProfile.full_name || currentProfile.email;
   partecipaForm.reset();
   partecipaForm.classList.remove('hidden');

@@ -132,8 +132,8 @@
     eventiTbody.innerHTML = (eventi || []).map(ev => `
       <tr>
         <td>${ev.titolo}</td>
-        <td>${calcolaStatoEvento(ev.data)}</td>
-        <td>${ev.data_testo || ev.data || '—'}</td>
+        <td>${calcolaStatoEvento(ev.data, ev.data_fine)}</td>
+        <td>${ev.data ? escapeHtml(dataEventoTesto({ data: ev.data, dataFine: ev.data_fine, dataTesto: ev.data_testo })) : '—'}</td>
         <td>${organizzatoreLabel(ev.organizzatore_id)}</td>
         <td><a href="dettaglio-evento.html#${ev.id}">${counts[ev.id] || 0}</a></td>
         <td class="row-actions">
@@ -193,7 +193,8 @@
     document.getElementById('evento-titolo').value      = ev.titolo || '';
     document.getElementById('evento-data').value          = ev.data || '';
     document.getElementById('evento-data-testo').value    = ev.data_testo || '';
-    document.getElementById('evento-durata').value        = ev.durata || '';
+    eventoDataFineEl.value                                 = ev.data_fine || '';
+    aggiornaDurataHint();
     document.getElementById('evento-luogo').value         = ev.luogo || '';
     eventoImmagineEl.value                                 = ev.immagine || '';
     document.getElementById('evento-credito').value       = ev.credito_immagine || '';
@@ -204,8 +205,23 @@
     apriModulo(eventoForm);
   }
 
+  const eventoDataEl     = document.getElementById('evento-data');
+  const eventoDataFineEl = document.getElementById('evento-data-fine');
+  const eventoDurataHint = document.getElementById('evento-durata-hint');
+  const DURATA_HINT_DEFAULT = eventoDurataHint.textContent;
+
+  // La fine non può precedere l'inizio; l'hint mostra i giorni calcolati
+  function aggiornaDurataHint() {
+    eventoDataFineEl.min = eventoDataEl.value || '';
+    const giorni = giorniEvento({ data: eventoDataEl.value, dataFine: eventoDataFineEl.value });
+    eventoDurataHint.textContent = giorni ? `Durata: ${durataEvento({ data: eventoDataEl.value, dataFine: eventoDataFineEl.value })}.` : DURATA_HINT_DEFAULT;
+  }
+  eventoDataEl.addEventListener('change', aggiornaDurataHint);
+  eventoDataFineEl.addEventListener('change', aggiornaDurataHint);
+
   function resetEventoForm() {
     eventoForm.reset();
+    aggiornaDurataHint();
     eventoIdEl.value = '';
     eventoCancel.classList.add('hidden');
     eventoError.textContent = '';
@@ -227,12 +243,21 @@
     e.preventDefault();
     eventoError.textContent = '';
 
+    const dataInizio = eventoDataEl.value || null;
+    let dataFine = eventoDataFineEl.value || null;
+    if (dataFine && !dataInizio) { eventoError.textContent = 'Inserisci anche la data di inizio.'; return; }
+    if (dataFine && dataFine < dataInizio) { eventoError.textContent = 'La data di fine non può precedere quella di inizio.'; return; }
+    if (dataFine === dataInizio) dataFine = null;
+
     const payload = {
       titolo:           document.getElementById('evento-titolo').value.trim(),
-      data:              document.getElementById('evento-data').value || null,
-      stato:             calcolaStatoEvento(document.getElementById('evento-data').value || null),
+      data:              dataInizio,
+      data_fine:         dataFine,
+      stato:             calcolaStatoEvento(dataInizio, dataFine),
       data_testo:        document.getElementById('evento-data-testo').value.trim() || null,
-      durata:            document.getElementById('evento-durata').value.trim() || null,
+      // La durata ora deriva dalle date: il vecchio testo libero si azzera
+      // appena c'è un intervallo, altrimenti resta com'era
+      ...(dataFine ? { durata: null } : {}),
       luogo:             document.getElementById('evento-luogo').value.trim() || null,
       immagine:          document.getElementById('evento-immagine').value.trim() || null,
       credito_immagine:  document.getElementById('evento-credito').value.trim() || null,
